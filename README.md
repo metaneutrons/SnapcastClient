@@ -1,3 +1,24 @@
 # Snapcast .NET
 
-Another .NET API client for [Snapcast](https://github.com/badaix/snapcast).
+Another .NET API client for [Snapcast](https://github.com/badaix/snapcast).  The current implementation uses a raw TCP connection to communicate with the Snapcast server.  All serialisation and deserialisation of data is handled within the client.
+
+
+## Usage
+
+### Initialise
+
+``` c#
+using SnapCastNet;
+
+var connection = new TcpConnection("127.0.0.1", 1705);
+var client = new Client(connection);
+
+var result = await client.ServerGetRpcVersionAsync();
+
+// result = {
+//   Major: 2,
+//   Minor: 0,
+//   Patch: 0
+// }
+```
+
