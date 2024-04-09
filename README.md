@@ -2,6 +2,8 @@
 
 Another .NET API client for [Snapcast](https://github.com/badaix/snapcast).  The current implementation uses a raw TCP connection to communicate with the Snapcast server.  All serialisation and deserialisation of data is handled within the client.
 
+**Note (10/04/2024): This project is a work in progress, but is actively being developed, when I find the time to push it forward.**
+
 
 ## Usage
 
