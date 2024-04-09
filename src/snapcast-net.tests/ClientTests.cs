@@ -225,6 +225,26 @@ public class ClientTests
 	}
 
 	[Test]
+	public void Test_GroupSetNameAsync()
+	{
+		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
+		Client Client = new Client(ConnectionMock.Object);
+
+		var expectedCommand = "{\"params\":{\"id\":\"4dcc4e3b-c699-a04b-7f0c-8260d23c43e1\",\"name\":\"GroundFloor\"},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Group.SetName\"}";
+
+		ConnectionMock.Setup(c => c.Read()).Returns((string?)null);
+		ConnectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		{
+			ConnectionMock.SetupSequence(c => c.Read())
+			.Returns(ServerResponses.GroupSetNameResponse())
+			.Returns((string?)null);
+		});
+
+		Client.GroupSetNameAsync("4dcc4e3b-c699-a04b-7f0c-8260d23c43e1", "GroundFloor").Wait();
+		ConnectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
+	}
+
+	[Test]
 	public void Test_ServerGetRpcVersionAsync()
 	{
 		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
@@ -509,6 +529,25 @@ public class ClientTests
 		});
 
 		var responseTask = Client.GroupSetClientsAsync("bla:bla:bla", [ "00:21:6a:7d:74:fc" ]);
+		var exception = Assert.ThrowsAsync<Commands.CommandException>(async () => await responseTask);
+		Assert.That(exception.Message, Is.EqualTo("Internal error: Group not found"));
+	}
+
+	[Test]
+	public void Test_GroupSetNameAsync_GroupNotFound()
+	{
+		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
+		Client Client = new Client(ConnectionMock.Object);
+
+		ConnectionMock.SetupSequence(c => c.Read()).Returns((string?)null);
+		ConnectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		{
+			ConnectionMock.SetupSequence(c => c.Read())
+			.Returns(ServerErrors.GroupNotFound())
+			.Returns((string?)null);
+		});
+
+		var responseTask = Client.GroupSetNameAsync("bla:bla:bla", "GroundFloor");
 		var exception = Assert.ThrowsAsync<Commands.CommandException>(async () => await responseTask);
 		Assert.That(exception.Message, Is.EqualTo("Internal error: Group not found"));
 	}

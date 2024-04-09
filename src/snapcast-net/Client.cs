@@ -218,6 +218,17 @@ public class Client : IClient
 		await tcs.Task;
 	}
 
+	public async Task GroupSetNameAsync(string id, string name)
+	{
+		var command = CommandFactory.createCommand(CommandType.GROUP_SET_NAME, new Params.GroupSetName { Id = id, Name = name });
+		if(command == null)
+			throw new Exception("Failed to create Group.SetName command");
+	
+		var tcs = new TaskCompletionSource<GroupNameSet>();
+		Execute(command, new ResponseHandler<GroupNameSet>(tcs.SetResult, e => tcs.SetException(new CommandException(e))));
+		await tcs.Task;
+	}
+
 	public async Task<Models.RpcVersion> ServerGetRpcVersionAsync()
 	{
 		var command = CommandFactory.createCommand(CommandType.SERVER_GET_RPC_VERSION, new NullParams());

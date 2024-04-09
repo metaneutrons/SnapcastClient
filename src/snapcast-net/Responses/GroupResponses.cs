@@ -43,3 +43,9 @@ public struct GroupClientsSet
 	[JsonProperty("server")]
 	public Models.Server Server;
 }
+
+public struct GroupNameSet
+{
+    [JsonProperty("name")]
+	public string Name;
+}

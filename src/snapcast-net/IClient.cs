@@ -36,6 +36,8 @@ public interface IClient
 
 	public Task GroupSetClientsAsync(string id, List<string> clients);
 
+    public Task GroupSetNameAsync(string id, string name);
+
 	public Task<Models.RpcVersion> ServerGetRpcVersionAsync();
 
 	public Task<Models.Server> ServerGetStatusAsync();

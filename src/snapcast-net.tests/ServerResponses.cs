@@ -274,4 +274,16 @@ internal class ServerResponses
 
 		return response.ReplaceLineEndings("");
 	}
+
+	public static string GroupSetNameResponse()
+	{
+		const string response = @"{
+			""id"": 0,
+			""jsonrpc"": ""2.0"",
+			""result"": {
+				""name"": ""GroundFloor""
+			}
+		}";
+		return response.ReplaceLineEndings("");
+	}
 }
