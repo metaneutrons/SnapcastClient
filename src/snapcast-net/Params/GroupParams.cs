@@ -52,3 +52,12 @@ public struct GroupSetClients
 	[JsonProperty("clients")]
 	public List<string> Clients { get; set; }
 }
+
+public struct GroupSetName
+{
+	[JsonProperty("id")]
+	public string Id { get; set; }
+
+	[JsonProperty("name")]
+	public string Name { get; set; }
+}

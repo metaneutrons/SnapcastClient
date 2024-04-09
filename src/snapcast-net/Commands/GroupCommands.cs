@@ -29,3 +29,6 @@ internal class GroupSetStream(uint id, object commandParams) :
 
 internal class GroupSetClients(uint id, object commandParams) :
 	CommandWithParams(id, "Group.SetClients", commandParams);
+
+internal class GroupSetName(uint id, object commandParams) :
+	CommandWithParams(id, "Group.SetName", commandParams);

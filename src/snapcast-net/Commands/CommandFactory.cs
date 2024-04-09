@@ -78,6 +78,11 @@ public class CommandFactory
 					throw new System.ArgumentNullException(nameof(commandParams));
 				return new GroupSetClients(NewId(), commandParams);
 
+			case CommandType.GROUP_SET_NAME:
+				if(commandParams == null)
+					throw new System.ArgumentNullException(nameof(commandParams));
+				return new GroupSetName(NewId(), commandParams);
+
 			case CommandType.SERVER_GET_RPC_VERSION:
 				return new ServerGetRpcVersion(NewId());
 

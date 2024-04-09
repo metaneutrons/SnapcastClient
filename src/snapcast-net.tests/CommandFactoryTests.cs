@@ -118,4 +118,12 @@ public class CommandFactoryTests
 		Assert.That(command, Is.Not.Null);
 		Assert.That(command.toJson(), Is.EqualTo("{\"params\":{\"id\":\"bla:bla:bla\"},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Server.DeleteClient\"}"));
 	}
+
+	[Test]
+	public void Test_createCommand_with_GROUP_SET_NAME_CommandType_generates_correct_json()
+	{
+		var command = CommandFactory.createCommand(CommandType.GROUP_SET_NAME, new GroupSetName { Id = "bla:bla:bla", Name = "new name" });
+		Assert.That(command, Is.Not.Null);
+		Assert.That(command.toJson(), Is.EqualTo("{\"params\":{\"id\":\"bla:bla:bla\",\"name\":\"new name\"},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Group.SetName\"}"));
+	}
 }
