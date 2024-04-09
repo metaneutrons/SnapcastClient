@@ -343,7 +343,27 @@ public class ClientTests
 		};
 
 		ConnectionMock.SetupSequence(c => c.Read())
-			.Returns(ServerNotifications.ClientConnectedNotification())
+			.Returns(ServerNotifications.ClientConnectNotification())
+			.Returns((string?)null);
+
+		var client = tcs.Task.Result;
+		ValidateClient(client);
+	}
+
+	[Test]
+	public void Test_OnClientDisconnect()
+	{
+		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
+		Client Client = new Client(ConnectionMock.Object);
+
+		var tcs = new TaskCompletionSource<SnapClient>();
+		Client.OnClientDisconnect = client =>
+		{
+			tcs.SetResult(client);
+		};
+
+		ConnectionMock.SetupSequence(c => c.Read())
+			.Returns(ServerNotifications.ClientDisconnectNotification())
 			.Returns((string?)null);
 
 		var client = tcs.Task.Result;
@@ -357,7 +377,7 @@ public class ClientTests
 		Client Client = new Client(ConnectionMock.Object);
 
 		ConnectionMock.SetupSequence(c => c.Read())
-			.Returns(ServerNotifications.ClientConnectedNotification())
+			.Returns(ServerNotifications.ClientConnectNotification())
 			.Returns((string?)null);
 	}
 

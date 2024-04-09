@@ -20,11 +20,53 @@ namespace SnapCastNet.tests;
 
 internal class ServerNotifications
 {
-	public static string ClientConnectedNotification()
+	public static string ClientConnectNotification()
 	{
 		const string notification = @"{
             ""jsonrpc"": ""2.0"",
             ""method"": ""Client.OnConnect"",
+            ""params"": {
+                ""client"": {
+                    ""config"": {
+                        ""instance"": 1,
+                        ""latency"": 0,
+                        ""name"": ""Kitchen"",
+                        ""volume"": {
+                            ""muted"": false,
+                            ""percent"": 74
+                        }
+                    },
+                    ""connected"": true,
+                    ""host"": {
+                        ""arch"": ""x86_64"",
+                        ""ip"": ""192.168.0.54"",
+                        ""mac"": ""00:21:6a:7d:74:fc"",
+                        ""name"": ""Kitchen"",
+                        ""os"": ""Raspbian GNU/Linux 10 (buster)""
+                    },
+                    ""id"": ""00:21:6a:7d:74:fc"",
+                    ""lastSeen"": {
+                        ""sec"": 1488025696,
+                        ""usec"": 611255
+                    },
+                    ""snapclient"": {
+                        ""name"": ""Snapclient"",
+                        ""protocolVersion"": 2,
+                        ""version"": ""0.10.0""
+                    }
+                },
+                ""id"": ""00:21:6a:7d:74:fc""
+            }
+        }";
+
+		return notification.ReplaceLineEndings("");
+	}
+
+	public static string ClientDisconnectNotification()
+	{
+		const string notification = @"{
+            ""jsonrpc"": ""2.0"",
+            ""method"": ""Client.OnDisconnect"",
             ""params"": {
                 ""client"": {
                     ""config"": {

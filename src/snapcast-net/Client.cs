@@ -35,6 +35,7 @@ public class Client : IClient
 	private Dictionary<uint, IResponseHandler> ResponseHandlers = new Dictionary<uint, IResponseHandler>();
 
 	public Action<SnapClient>? OnClientConnect { set; get; }
+	public Action<SnapClient>? OnClientDisconnect { set; get; }
 
 	public Client(IConnection connection)
 	{
@@ -110,6 +111,11 @@ public class Client : IClient
 		{
 			var notification = JsonConvert.DeserializeObject<RpcNotification<ClientStatus>>(response);
 			OnClientConnect?.Invoke(notification.Params.Client);
+		}
+		else if(method == "Client.OnDisconnect")
+		{
+			var notification = JsonConvert.DeserializeObject<RpcNotification<ClientStatus>>(response);
+			OnClientDisconnect?.Invoke(notification.Params.Client);
 		}
 	}
 
