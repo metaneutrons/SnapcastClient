@@ -93,6 +93,11 @@ public class CommandFactory
 				if(commandParams == null)
 					throw new System.ArgumentNullException(nameof(commandParams));
 				return new ServerDeleteClient(NewId(), commandParams);
+
+			case CommandType.STREAM_ADD_STREAM:
+				if (commandParams == null)
+					throw new System.ArgumentNullException(nameof(commandParams));
+				return new StreamAddStream(NewId(), commandParams);
 		}
 
 		return null;
