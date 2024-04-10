@@ -24,3 +24,35 @@ var result = await client.ServerGetRpcVersionAsync();
 // }
 ```
 
+## Implemented Commands
+
+- [x] Client.GetStatus
+- [x] Client.SetVolume
+- [x] Client.SetLatency
+- [x] Client.SetName
+- [x] Group.GetStatus
+- [x] Group.SetMute
+- [x] Group.SetStream
+- [x] Group.SetClients
+- [x] Group.SetName
+- [x] Server.GetRPCVersion
+- [x] Server.GetStatus
+- [x] Server.DeleteClient
+- [ ] Stream.AddStream
+- [ ] Stream.RemoveStream
+- [ ] Stream.Control
+- [ ] Stream.SetProperty
+
+## Implemented Notifications
+
+- [x] Client.OnConnect
+- [x] Client.OnDisconnect
+- [ ] Client.OnVolumeChanged
+- [ ] Client.OnLatencyChanged
+- [ ] Client.OnNameChanged
+- [ ] Group.OnMute
+- [ ] Group.OnStreamChanged
+- [ ] Group.OnNameChanged
+- [ ] Stream.OnProperties
+- [ ] Stream.OnUpdate
+- [ ] Server.OnUpdate
