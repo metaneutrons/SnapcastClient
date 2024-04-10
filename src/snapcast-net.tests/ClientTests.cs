@@ -1,4 +1,4 @@
-/***
+﻿/***
     This file is part of snapcast-net
     Copyright (C) 2024  Craig Sturdy
 
@@ -47,6 +47,20 @@ public class ClientTests
 		Assert.That(client.ClientInfo.Name, Is.EqualTo("Snapclient"));
 		Assert.That(client.ClientInfo.ProtocolVersion, Is.EqualTo(2));
 		Assert.That(client.ClientInfo.Version, Is.EqualTo("0.10.0"));
+	}
+
+	private void ValidateServerInfo(ServerInfo serverInfo)
+	{
+		Assert.That(serverInfo.SnapServer.Version, Is.EqualTo("0.10.0"));
+		Assert.That(serverInfo.SnapServer.ProtocolVersion, Is.EqualTo(1));
+		Assert.That(serverInfo.SnapServer.ControlProtocolVersion, Is.EqualTo(1));
+		Assert.That(serverInfo.SnapServer.Name, Is.EqualTo("Snapserver"));
+
+		Assert.That(serverInfo.Host.Arch, Is.EqualTo("x86_64"));
+		Assert.That(serverInfo.Host.Ip, Is.EqualTo("127.0.0.1"));
+		Assert.That(serverInfo.Host.Mac, Is.EqualTo(""));
+		Assert.That(serverInfo.Host.Name, Is.EqualTo("SnapServer"));
+		Assert.That(serverInfo.Host.Os, Is.EqualTo("Raspbian GNU/Linux 10 (buster)"));
 	}
 
 	[Test]
@@ -293,17 +307,7 @@ public class ClientTests
 
 		Assert.IsNotNull(response);
 
-		var serverInfo = response.ServerInfo;
-		Assert.That(serverInfo.SnapServer.Version, Is.EqualTo("0.10.0"));
-		Assert.That(serverInfo.SnapServer.ProtocolVersion, Is.EqualTo(1));
-		Assert.That(serverInfo.SnapServer.ControlProtocolVersion, Is.EqualTo(1));
-		Assert.That(serverInfo.SnapServer.Name, Is.EqualTo("Snapserver"));
-
-		Assert.That(serverInfo.Host.Arch, Is.EqualTo("x86_64"));
-		Assert.That(serverInfo.Host.Ip, Is.EqualTo("127.0.0.1"));
-		Assert.That(serverInfo.Host.Mac, Is.EqualTo(""));
-		Assert.That(serverInfo.Host.Name, Is.EqualTo("SnapServer"));
-		Assert.That(serverInfo.Host.Os, Is.EqualTo("Raspbian GNU/Linux 10 (buster)"));
+		ValidateServerInfo(response.ServerInfo);
 
 		var groups = response.Groups;
 		Assert.That(groups.Count, Is.EqualTo(1));
