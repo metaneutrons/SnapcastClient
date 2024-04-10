@@ -1,4 +1,4 @@
-﻿/***
+/***
     This file is part of snapcast-net
     Copyright (C) 2024  Craig Sturdy
 
@@ -257,6 +257,17 @@ public class Client : IClient
 
 		var response = await tcs.Task;
 		return response.Server;
+	}
+
+	public async Task ServerDeleteClientAsync(string id)
+	{
+		var command = CommandFactory.createCommand(CommandType.SERVER_DELETE_CLIENT, new Params.ServerDeleteClient { Id = id });
+		if (command == null)
+			throw new Exception("Failed to create Server.DeleteClient command");
+
+		var tcs = new TaskCompletionSource<DeleteClient>();
+		Execute(command, new ResponseHandler<DeleteClient>(tcs.SetResult));
+		await tcs.Task;
 	}
 
 	public async Task<string> StreamAddStreamAsync(string streamUri)

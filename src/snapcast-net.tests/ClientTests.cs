@@ -1,4 +1,4 @@
-﻿/***
+/***
     This file is part of snapcast-net
     Copyright (C) 2024  Craig Sturdy
 
@@ -328,6 +328,26 @@ public class ClientTests
 		Assert.That(stream.Uri.Path, Is.EqualTo("/tmp/snapfifo"));
 		Assert.That(stream.Uri.Raw, Is.EqualTo("pipe:///tmp/snapfifo?name=stream 1"));
 		Assert.That(stream.Uri.Scheme, Is.EqualTo("pipe"));
+	}
+
+	[Test]
+	public void Test_ServerDeleteClientAsync()
+	{
+		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
+		Client Client = new Client(ConnectionMock.Object);
+
+		var expectedCommand = "{\"params\":{\"id\":\"bla:bla:bla\"},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Server.DeleteClient\"}";
+
+		ConnectionMock.Setup(c => c.Read()).Returns((string?)null);
+		ConnectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		{
+			ConnectionMock.SetupSequence(c => c.Read())
+				.Returns(ServerResponses.ServerDeleteClientResponse())
+				.Returns((string?)null);
+		});
+
+		Client.ServerDeleteClientAsync("bla:bla:bla").Wait();
+		ConnectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
 	}
 
 	[Test]

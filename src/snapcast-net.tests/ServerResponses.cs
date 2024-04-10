@@ -275,6 +275,11 @@ internal class ServerResponses
 		return response.ReplaceLineEndings("");
 	}
 
+	public static string ServerDeleteClientResponse()
+	{
+		return ServerGetStatusResponse();
+	}
+
 	public static string GroupSetNameResponse()
 	{
 		const string response = @"{

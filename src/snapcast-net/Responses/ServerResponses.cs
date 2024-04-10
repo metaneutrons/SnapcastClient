@@ -25,3 +25,9 @@ public struct ServerStatus
 	[JsonProperty("server")]
 	public Models.Server Server;
 }
+
+public struct DeleteClient
+{
+	[JsonProperty("server")]
+	public Models.Server Server;
+}

@@ -42,6 +42,8 @@ public interface IClient
 
 	public Task<Models.Server> ServerGetStatusAsync();
 
+    public Task ServerDeleteClientAsync(string id);
+
     public Task<string> StreamAddStreamAsync(string streamUri);
 
 	public Action<Models.SnapClient>? OnClientConnect { set; }
