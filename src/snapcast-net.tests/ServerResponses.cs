@@ -286,4 +286,16 @@ internal class ServerResponses
 		}";
 		return response.ReplaceLineEndings("");
 	}
+
+	public static string StreamAddStreamResponse()
+	{
+		const string response = @"{
+			""id"": 0,
+			""jsonrpc"": ""2.0"",
+			""result"": {
+				""stream_id"": ""stream 2""
+			}
+		}";
+		return response.ReplaceLineEndings("");
+	}
 }

@@ -331,6 +331,29 @@ public class ClientTests
 	}
 
 	[Test]
+	public void Test_StreamAddStreamAsync()
+	{
+		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
+		Client Client = new Client(ConnectionMock.Object);
+
+		var expectedCommand = "{\"params\":{\"streamUri\":\"pipe:///tmp/snapfifo?name=stream 2\"},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Stream.AddStream\"}";
+
+		ConnectionMock.Setup(c => c.Read()).Returns((string?)null);
+		ConnectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		{
+			ConnectionMock.SetupSequence(c => c.Read())
+			.Returns(ServerResponses.StreamAddStreamResponse())
+			.Returns((string?)null);
+		});
+
+		var responseTask = Client.StreamAddStreamAsync("pipe:///tmp/snapfifo?name=stream 2");
+		var response = responseTask.Result;
+		ConnectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
+
+		Assert.That(response, Is.EqualTo("stream 2"));
+	}
+
+	[Test]
 	public void Test_OnClientConnect()
 	{
 		Mock<IConnection> ConnectionMock = new Mock<IConnection>();

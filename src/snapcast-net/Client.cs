@@ -258,4 +258,17 @@ public class Client : IClient
 		var response = await tcs.Task;
 		return response.Server;
 	}
+
+	public async Task<string> StreamAddStreamAsync(string streamUri)
+	{
+		var command = CommandFactory.createCommand(CommandType.STREAM_ADD_STREAM, new Params.StreamAddStream { StreamUri = streamUri });
+		if (command == null)
+			throw new Exception("Failed to create Stream.AddStream command");
+
+		var tcs = new TaskCompletionSource<AddRemove>();
+		Execute(command, new ResponseHandler<AddRemove>(tcs.SetResult));
+
+		var response = await tcs.Task;
+		return response.StreamId;
+	}
 }
