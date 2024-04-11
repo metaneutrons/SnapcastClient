@@ -49,7 +49,7 @@ var result = await client.ServerGetRpcVersionAsync();
 - [x] Client.OnDisconnect
 - [x] Client.OnVolumeChanged
 - [x] Client.OnLatencyChanged
-- [ ] Client.OnNameChanged
+- [x] Client.OnNameChanged
 - [ ] Group.OnMute
 - [ ] Group.OnStreamChanged
 - [ ] Group.OnNameChanged
