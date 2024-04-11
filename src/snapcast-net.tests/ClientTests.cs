@@ -448,6 +448,28 @@ public class ClientTests
 			.Returns((string?)null);
 	}
 
+	[Test]
+	public void Test_OnClientVolumeChanged()
+	{
+		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
+		Client Client = new Client(ConnectionMock.Object);
+
+		var tcs = new TaskCompletionSource<Params.ClientSetVolume>();
+		Client.OnClientVolumeChanged = volume =>
+		{
+			tcs.SetResult(volume);
+		};
+
+		ConnectionMock.SetupSequence(c => c.Read())
+			.Returns(ServerNotifications.ClientVolumeChangedNotification())
+			.Returns((string?)null);
+
+		var result = tcs.Task.Result;
+		Assert.That(result.Id, Is.EqualTo("00:21:6a:7d:74:fc"));
+		Assert.That(result.Volume.Muted, Is.False);
+		Assert.That(result.Volume.Percent, Is.EqualTo(36));
+	}
+
 	// Test Client error handling
 	[Test]
 	public void Test_ClientGetStatusAsync_ClientNotFound()

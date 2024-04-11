@@ -103,4 +103,21 @@ internal class ServerNotifications
 
 		return notification.ReplaceLineEndings("");
 	}
+
+    public static string ClientVolumeChangedNotification()
+    {
+		const string notification = @"{
+			""jsonrpc"": ""2.0"",
+			""method"": ""Client.OnVolumeChanged"",
+			""params"": {
+				""id"": ""00:21:6a:7d:74:fc"",
+				""volume"": {
+					""muted"": false,
+					""percent"": 36
+				}
+			}
+		}";
+
+		return notification.ReplaceLineEndings("");
+	}
 }

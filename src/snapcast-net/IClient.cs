@@ -49,4 +49,8 @@ public interface IClient
     public Task<string> StreamRemoveStreamAsync(string id);
 
 	public Action<Models.SnapClient>? OnClientConnect { set; }
+
+	public Action<Models.SnapClient>? OnClientDisconnect { set; }
+
+    public Action<Params.ClientSetVolume>? OnClientVolumeChanged { set; }
 }

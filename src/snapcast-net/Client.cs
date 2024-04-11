@@ -37,6 +37,8 @@ public class Client : IClient
 	public Action<SnapClient>? OnClientConnect { set; get; }
 	public Action<SnapClient>? OnClientDisconnect { set; get; }
 
+	public Action<Params.ClientSetVolume>? OnClientVolumeChanged { set; get; }
+
 	public Client(IConnection connection)
 	{
 		Connection = connection;
@@ -116,6 +118,11 @@ public class Client : IClient
 		{
 			var notification = JsonConvert.DeserializeObject<RpcNotification<ClientStatus>>(response);
 			OnClientDisconnect?.Invoke(notification.Params.Client);
+		}
+		else if (method == "Client.OnVolumeChanged")
+		{
+			var notification = JsonConvert.DeserializeObject<RpcNotification<Params.ClientSetVolume>>(response);
+			OnClientVolumeChanged?.Invoke(notification.Params);
 		}
 	}
 
