@@ -98,6 +98,11 @@ public class CommandFactory
 				if (commandParams == null)
 					throw new System.ArgumentNullException(nameof(commandParams));
 				return new StreamAddStream(NewId(), commandParams);
+
+			case CommandType.STREAM_REMOVE_STREAM:
+				if (commandParams == null)
+					throw new System.ArgumentNullException(nameof(commandParams));
+				return new StreamRemoveStream(NewId(), commandParams);
 		}
 
 		return null;

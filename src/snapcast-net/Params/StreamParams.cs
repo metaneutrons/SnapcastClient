@@ -25,3 +25,9 @@ public struct StreamAddStream
 	[JsonProperty("streamUri")]
 	public string StreamUri;
 }
+
+public struct StreamRemoveStream
+{
+    [JsonProperty("id")]
+	public string Id;
+}

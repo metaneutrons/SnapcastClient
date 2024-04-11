@@ -134,4 +134,12 @@ public class CommandFactoryTests
 		Assert.That(command, Is.Not.Null);
 		Assert.That(command.toJson(), Is.EqualTo("{\"params\":{\"streamUri\":\"pipe:///tmp/snapfifo?name=stream 2\"},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Stream.AddStream\"}"));
 	}
+
+	[Test]
+	public void Test_createCommand_with_STREAM_REMOVE_STREAM_CommandType_generates_correct_json()
+	{
+		var command = CommandFactory.createCommand(CommandType.STREAM_REMOVE_STREAM, new StreamRemoveStream { Id = "stream 2" });
+		Assert.That(command, Is.Not.Null);
+		Assert.That(command.toJson(), Is.EqualTo("{\"params\":{\"id\":\"stream 2\"},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Stream.RemoveStream\"}"));
+	}
 }

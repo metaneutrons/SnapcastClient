@@ -20,3 +20,6 @@ namespace SnapCastNet.Commands;
 
 internal class StreamAddStream(uint id, object commandParams) :
 	CommandWithParams(id, "Stream.AddStream", commandParams);
+
+internal class StreamRemoveStream(uint id, object commandParams) :
+    CommandWithParams(id, "Stream.RemoveStream", commandParams);
