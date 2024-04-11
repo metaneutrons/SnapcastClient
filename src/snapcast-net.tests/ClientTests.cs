@@ -470,6 +470,48 @@ public class ClientTests
 		Assert.That(result.Volume.Percent, Is.EqualTo(36));
 	}
 
+	[Test]
+	public void Test_OnClientLatencyChanged()
+	{
+		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
+		Client Client = new Client(ConnectionMock.Object);
+
+		var tcs = new TaskCompletionSource<Params.ClientSetLatency>();
+		Client.OnClientLatencyChanged = latency =>
+		{
+			tcs.SetResult(latency);
+		};
+
+		ConnectionMock.SetupSequence(c => c.Read())
+			.Returns(ServerNotifications.ClientLatencyChangedNotification())
+			.Returns((string?)null);
+
+		var result = tcs.Task.Result;
+		Assert.That(result.Id, Is.EqualTo("00:21:6a:7d:74:fc"));
+		Assert.That(result.Latency, Is.EqualTo(50));
+	}
+
+	[Test]
+	public void Test_OnClientNameChanged()
+	{
+		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
+		Client Client = new Client(ConnectionMock.Object);
+
+		var tcs = new TaskCompletionSource<Params.ClientSetName>();
+		Client.OnClientNameChanged = name =>
+		{
+			tcs.SetResult(name);
+		};
+
+		ConnectionMock.SetupSequence(c => c.Read())
+			.Returns(ServerNotifications.ClientNameChangedNotification())
+			.Returns((string?)null);
+
+		var result = tcs.Task.Result;
+		Assert.That(result.Id, Is.EqualTo("00:21:6a:7d:74:fc"));
+		Assert.That(result.Name, Is.EqualTo("Laptop"));
+	}
+
 	// Test Client error handling
 	[Test]
 	public void Test_ClientGetStatusAsync_ClientNotFound()

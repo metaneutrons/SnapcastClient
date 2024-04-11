@@ -53,4 +53,8 @@ public interface IClient
 	public Action<Models.SnapClient>? OnClientDisconnect { set; }
 
     public Action<Params.ClientSetVolume>? OnClientVolumeChanged { set; }
+
+    public Action<Params.ClientSetLatency>? OnClientLatencyChanged { set; }
+
+    public Action<Params.ClientSetName>? OnClientNameChanged { set; }
 }

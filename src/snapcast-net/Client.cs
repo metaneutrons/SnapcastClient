@@ -39,6 +39,10 @@ public class Client : IClient
 
 	public Action<Params.ClientSetVolume>? OnClientVolumeChanged { set; get; }
 
+	public Action<Params.ClientSetLatency>? OnClientLatencyChanged { set; get; }
+
+	public Action<Params.ClientSetName>? OnClientNameChanged { set; get; }
+
 	public Client(IConnection connection)
 	{
 		Connection = connection;
@@ -123,6 +127,16 @@ public class Client : IClient
 		{
 			var notification = JsonConvert.DeserializeObject<RpcNotification<Params.ClientSetVolume>>(response);
 			OnClientVolumeChanged?.Invoke(notification.Params);
+		}
+		else if (method == "Client.OnLatencyChanged")
+		{
+			var notification = JsonConvert.DeserializeObject<RpcNotification<Params.ClientSetLatency>>(response);
+			OnClientLatencyChanged?.Invoke(notification.Params);
+		}
+		else if (method == "Client.OnNameChanged")
+		{
+			var notification = JsonConvert.DeserializeObject<RpcNotification<Params.ClientSetName>>(response);
+			OnClientNameChanged?.Invoke(notification.Params);
 		}
 	}
 

@@ -39,7 +39,7 @@ var result = await client.ServerGetRpcVersionAsync();
 - [x] Server.GetStatus
 - [x] Server.DeleteClient
 - [x] Stream.AddStream
-- [ ] Stream.RemoveStream
+- [x] Stream.RemoveStream
 - [ ] Stream.Control
 - [ ] Stream.SetProperty
 
@@ -47,8 +47,8 @@ var result = await client.ServerGetRpcVersionAsync();
 
 - [x] Client.OnConnect
 - [x] Client.OnDisconnect
-- [ ] Client.OnVolumeChanged
-- [ ] Client.OnLatencyChanged
+- [x] Client.OnVolumeChanged
+- [x] Client.OnLatencyChanged
 - [ ] Client.OnNameChanged
 - [ ] Group.OnMute
 - [ ] Group.OnStreamChanged
