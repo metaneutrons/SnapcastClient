@@ -46,5 +46,7 @@ public interface IClient
 
     public Task<string> StreamAddStreamAsync(string streamUri);
 
+    public Task<string> StreamRemoveStreamAsync(string id);
+
 	public Action<Models.SnapClient>? OnClientConnect { set; }
 }

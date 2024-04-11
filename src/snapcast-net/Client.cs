@@ -353,4 +353,22 @@ public class Client : IClient
 		var response = await tcs.Task;
 		return response.StreamId;
 	}
+
+	/// <summary>
+	/// Removes a stream from the server.
+	/// </summary>
+	/// <param name="id">The ID of the stream to remove.</param>
+	/// <returns>The ID of the removed stream.</returns>
+	public async Task<string> StreamRemoveStreamAsync(string id)
+	{
+		var command = CommandFactory.createCommand(CommandType.STREAM_REMOVE_STREAM, new Params.StreamRemoveStream { Id = id });
+		if (command == null)
+			throw new Exception("Failed to create Stream.RemoveStream command");
+
+		var tcs = new TaskCompletionSource<AddRemove>();
+		Execute(command, new ResponseHandler<AddRemove>(tcs.SetResult));
+
+		var response = await tcs.Task;
+		return response.StreamId;
+	}
 }

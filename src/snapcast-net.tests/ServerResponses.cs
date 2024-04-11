@@ -303,4 +303,9 @@ internal class ServerResponses
 		}";
 		return response.ReplaceLineEndings("");
 	}
+
+	public static string StreamRemoveStreamResponse()
+	{
+		return StreamAddStreamResponse();
+	}
 }

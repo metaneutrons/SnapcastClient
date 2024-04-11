@@ -378,6 +378,26 @@ public class ClientTests
 	}
 
 	[Test]
+	public void Test_StreamRemoveStreamAsync()
+	{
+		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
+		Client Client = new Client(ConnectionMock.Object);
+
+		var expectedCommand = "{\"params\":{\"id\":\"stream 2\"},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Stream.RemoveStream\"}";
+
+		ConnectionMock.Setup(c => c.Read()).Returns((string?)null);
+		ConnectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		{
+			ConnectionMock.SetupSequence(c => c.Read())
+			.Returns(ServerResponses.StreamRemoveStreamResponse())
+			.Returns((string?)null);
+		});
+
+		Client.StreamRemoveStreamAsync("stream 2").Wait();
+		ConnectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
+	}
+
+	[Test]
 	public void Test_OnClientConnect()
 	{
 		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
