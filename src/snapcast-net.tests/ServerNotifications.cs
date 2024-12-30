@@ -148,4 +148,32 @@ internal class ServerNotifications
 
 		return notification.ReplaceLineEndings("");
 	}
+
+	public static string StreamUpdateNotification()
+	{
+		const string notification = @"{
+			""jsonrpc"": ""2.0"",
+			""method"":""Stream.OnUpdate"",
+			""params"": {
+				""id"":""stream 1"",
+				""stream"":{
+					""id"":""stream 1"",
+					""status"":""idle"",
+					""uri"": {
+						""fragment"":""test"",
+						""host"":""localhost"",
+						""path"":""/tmp/snapfifo"",
+						""query"": {
+							""chunk_ms"":""20"",
+							""codec"":""flac"",
+							""name"":""stream 1"",
+							""sampleformat"":""48000:16:2""
+						},
+						""raw"": ""pipe:///tmp/snapfifo?name=stream 1"",""scheme"":""pipe""
+					}
+				}
+			}
+		}";
+		return notification.ReplaceLineEndings("");
+	}
 }

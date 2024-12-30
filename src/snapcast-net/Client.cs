@@ -42,6 +42,8 @@ public class Client : IClient
 	public Action<Params.ClientSetLatency>? OnClientLatencyChanged { set; get; }
 
 	public Action<Params.ClientSetName>? OnClientNameChanged { set; get; }
+	
+	public Action<Models.Stream>? OnStreamUpdate { set; get; } 
 
 	public Client(IConnection connection)
 	{
@@ -137,6 +139,11 @@ public class Client : IClient
 		{
 			var notification = JsonConvert.DeserializeObject<RpcNotification<Params.ClientSetName>>(response);
 			OnClientNameChanged?.Invoke(notification.Params);
+		}
+		else if (method == "Stream.OnUpdate")
+		{
+			var notification = JsonConvert.DeserializeObject<RpcNotification<Params.StreamOnUpdate>>(response);
+			OnStreamUpdate?.Invoke(notification.Params.Stream);
 		}
 	}
 

@@ -116,7 +116,7 @@ public struct Stream
 	public string Status;
 
 	[JsonProperty("properties")]
-	public StreamProperties Properties;
+	public StreamProperties? Properties;
 
 	[JsonProperty("uri")]
 	public Uri Uri;

@@ -512,6 +512,36 @@ public class ClientTests
 		Assert.That(result.Name, Is.EqualTo("Laptop"));
 	}
 
+	[Test]
+	public void Test_StreamOnUpdate()
+	{
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client client = new Client(connectionMock.Object);
+		
+		var tcs = new TaskCompletionSource<Models.Stream>();
+		client.OnStreamUpdate = stream =>
+		{
+			tcs.SetResult(stream);
+		};
+
+		connectionMock.SetupSequence(c => c.Read())
+			.Returns(ServerNotifications.StreamUpdateNotification())
+			.Returns((string?)null);
+
+		var result = tcs.Task.Result;
+		Assert.That(result.Id, Is.EqualTo("stream 1"));
+		Assert.That(result.Status, Is.EqualTo("idle"));
+		Assert.That(result.Uri.Fragment, Is.EqualTo("test"));
+		Assert.That(result.Uri.Host, Is.EqualTo("localhost"));
+		Assert.That(result.Uri.Path, Is.EqualTo("/tmp/snapfifo"));
+		Assert.That(result.Uri.Query.Name, Is.EqualTo("stream 1"));
+		Assert.That(result.Uri.Query.ChunkMs, Is.EqualTo("20"));
+		Assert.That(result.Uri.Query.Codec, Is.EqualTo("flac"));
+		Assert.That(result.Uri.Query.SampleFormat, Is.EqualTo("48000:16:2"));
+		Assert.That(result.Uri.Raw, Is.EqualTo("pipe:///tmp/snapfifo?name=stream 1"));
+		Assert.That(result.Uri.Scheme, Is.EqualTo("pipe"));
+	}
+
 	// Test Client error handling
 	[Test]
 	public void Test_ClientGetStatusAsync_ClientNotFound()

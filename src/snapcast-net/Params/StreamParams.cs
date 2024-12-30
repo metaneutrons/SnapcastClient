@@ -31,3 +31,12 @@ public struct StreamRemoveStream
     [JsonProperty("id")]
 	public string Id;
 }
+
+public struct StreamOnUpdate
+{
+	[JsonProperty("id")]
+	public string Id;
+	
+	[JsonProperty("stream")]
+	public Models.Stream Stream;
+}
