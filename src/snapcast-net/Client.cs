@@ -43,7 +43,7 @@ public class Client : IClient
 
 	public Action<Params.ClientSetName>? OnClientNameChanged { set; get; }
 	
-	public Action<Models.Stream>? OnStreamUpdate { set; get; } 
+	public Func<Models.Stream, Task>? OnStreamUpdate { set; get; }
 
 	public Client(IConnection connection)
 	{

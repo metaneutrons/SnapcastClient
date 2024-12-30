@@ -522,6 +522,7 @@ public class ClientTests
 		client.OnStreamUpdate = stream =>
 		{
 			tcs.SetResult(stream);
+			return Task.CompletedTask;
 		};
 
 		connectionMock.SetupSequence(c => c.Read())
