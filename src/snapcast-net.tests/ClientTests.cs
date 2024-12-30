@@ -66,23 +66,23 @@ public class ClientTests
 	[Test]
 	public void Test_ClientGetStatusAsync()
 	{
-		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
-		Client Client = new Client(ConnectionMock.Object);
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
 
 		var expectedCommand = "{\"params\":{\"id\":\"bla:bla:bla\"},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Client.GetStatus\"}";
 
-		ConnectionMock.Setup(c => c.Read()).Returns((string?)null);
-		ConnectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		connectionMock.Setup(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
 		{
-			ConnectionMock.SetupSequence(c => c.Read())
+			connectionMock.SetupSequence(c => c.Read())
 				.Returns(ServerResponses.ClientGetStatusResponse())
 				.Returns((string?)null);
 		});
 
-		var responseTask = Client.ClientGetStatusAsync("bla:bla:bla");
+		var responseTask = snapClient.ClientGetStatusAsync("bla:bla:bla");
 		var response = responseTask.Result;
 
-		ConnectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
+		connectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
 
 		Assert.IsNotNull(response);
 		ValidateClient(response);
@@ -91,82 +91,82 @@ public class ClientTests
 	[Test]
 	public void Test_ClientSetVolumeAsync()
 	{
-		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
-		Client Client = new Client(ConnectionMock.Object);
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
 
 		var expectedCommand = "{\"params\":{\"id\":\"bla:bla:bla\",\"volume\":{\"muted\":false,\"percent\":36}},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Client.SetVolume\"}";
 
-		ConnectionMock.Setup(c => c.Read()).Returns((string?)null);
-		ConnectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		connectionMock.Setup(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
 		{
-			ConnectionMock.SetupSequence(c => c.Read())
+			connectionMock.SetupSequence(c => c.Read())
 				.Returns(ServerResponses.ClientSetVolumeResponse())
 				.Returns((string?)null);
 		});
 
-		Client.ClientSetVolumeAsync("bla:bla:bla", 36).Wait();
-		ConnectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
+		snapClient.ClientSetVolumeAsync("bla:bla:bla", 36).Wait();
+		connectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
 	}
 
 	[Test]
 	public void Test_ClientSetLatencyAsync()
 	{
-		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
-		Client Client = new Client(ConnectionMock.Object);
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
 
 		var expectedCommand = "{\"params\":{\"id\":\"bla:bla:bla\",\"latency\":10},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Client.SetLatency\"}";
 
-		ConnectionMock.Setup(c => c.Read()).Returns((string?)null);
-		ConnectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		connectionMock.Setup(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
 		{
-			ConnectionMock.SetupSequence(c => c.Read())
+			connectionMock.SetupSequence(c => c.Read())
 				.Returns(ServerResponses.ClientSetLatencyResponse())
 				.Returns((string?)null);
 		});
 
-		Client.ClientSetLatencyAsync("bla:bla:bla", 10).Wait();
-		ConnectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
+		snapClient.ClientSetLatencyAsync("bla:bla:bla", 10).Wait();
+		connectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
 	}
 
 	[Test]
 	public void Test_ClientSetNameAsync()
 	{
-		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
-		Client Client = new Client(ConnectionMock.Object);
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
 
 		var expectedCommand = "{\"params\":{\"id\":\"bla:bla:bla\",\"name\":\"Laptop\"},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Client.SetName\"}";
 
-		ConnectionMock.Setup(c => c.Read()).Returns((string?)null);
-		ConnectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		connectionMock.Setup(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
 		{
-			ConnectionMock.SetupSequence(c => c.Read())
+			connectionMock.SetupSequence(c => c.Read())
 				.Returns(ServerResponses.ClientSetNameResponse())
 				.Returns((string?)null);
 		});
 
-		Client.ClientSetNameAsync("bla:bla:bla", "Laptop").Wait();
-		ConnectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
+		snapClient.ClientSetNameAsync("bla:bla:bla", "Laptop").Wait();
+		connectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
 	}
 
 	[Test]
 	public void Test_GroupGetStatusAsync()
 	{
-		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
-		Client Client = new Client(ConnectionMock.Object);
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
 
 		var expectedCommand = "{\"params\":{\"id\":\"4dcc4e3b-c699-a04b-7f0c-8260d23c43e1\"},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Group.GetStatus\"}";
 
-		ConnectionMock.Setup(c => c.Read()).Returns((string?)null);
-		ConnectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		connectionMock.Setup(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
 		{
-			ConnectionMock.SetupSequence(c => c.Read())
+			connectionMock.SetupSequence(c => c.Read())
 			.Returns(ServerResponses.GroupGetStatusResponse())
 			.Returns((string?)null);
 		});
 
-		var responseTask = Client.GroupGetStatusAsync("4dcc4e3b-c699-a04b-7f0c-8260d23c43e1");
+		var responseTask = snapClient.GroupGetStatusAsync("4dcc4e3b-c699-a04b-7f0c-8260d23c43e1");
 		var response = responseTask.Result;
-		ConnectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
+		connectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
 
 		Assert.IsNotNull(response);
 
@@ -182,101 +182,101 @@ public class ClientTests
 	[Test]
 	public void Test_GroupSetMuteAsync()
 	{
-		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
-		Client Client = new Client(ConnectionMock.Object);
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
 
 		var expectedCommand = "{\"params\":{\"id\":\"4dcc4e3b-c699-a04b-7f0c-8260d23c43e1\",\"mute\":true},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Group.SetMute\"}";
 
-		ConnectionMock.Setup(c => c.Read()).Returns((string?)null);
-		ConnectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		connectionMock.Setup(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
 		{
-			ConnectionMock.SetupSequence(c => c.Read())
+			connectionMock.SetupSequence(c => c.Read())
 			.Returns(ServerResponses.GroupSetMuteResponse())
 			.Returns((string?)null);
 		});
-		Client.GroupSetMuteAsync("4dcc4e3b-c699-a04b-7f0c-8260d23c43e1", true).Wait();
-		ConnectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
+		snapClient.GroupSetMuteAsync("4dcc4e3b-c699-a04b-7f0c-8260d23c43e1", true).Wait();
+		connectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
 	}
 
 	[Test]
 	public void Test_GroupSetStreamAsync()
 	{
-		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
-		Client Client = new Client(ConnectionMock.Object);
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
 
 		var expectedCommand = "{\"params\":{\"id\":\"4dcc4e3b-c699-a04b-7f0c-8260d23c43e1\",\"stream_id\":\"stream 1\"},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Group.SetStream\"}";
 
-		ConnectionMock.Setup(c => c.Read()).Returns((string?)null);
-		ConnectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		connectionMock.Setup(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
 		{
-			ConnectionMock.SetupSequence(c => c.Read())
+			connectionMock.SetupSequence(c => c.Read())
 			.Returns(ServerResponses.GroupSetStreamResponse())
 			.Returns((string?)null);
 		});
 
-		Client.GroupSetStreamAsync("4dcc4e3b-c699-a04b-7f0c-8260d23c43e1", "stream 1").Wait();
-		ConnectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
+		snapClient.GroupSetStreamAsync("4dcc4e3b-c699-a04b-7f0c-8260d23c43e1", "stream 1").Wait();
+		connectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
 	}
 
 	[Test]
 	public void Test_GroupSetClientsAsync()
 	{
-		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
-		Client Client = new Client(ConnectionMock.Object);
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
 
 		var expectedCommand = "{\"params\":{\"id\":\"4dcc4e3b-c699-a04b-7f0c-8260d23c43e1\",\"clients\":[\"00:21:6a:7d:74:fc\"]},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Group.SetClients\"}";
 
-		ConnectionMock.Setup(c => c.Read()).Returns((string?)null);
-		ConnectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		connectionMock.Setup(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
 		{
-			ConnectionMock.SetupSequence(c => c.Read())
+			connectionMock.SetupSequence(c => c.Read())
 			.Returns(ServerResponses.GroupSetClientsResponse())
 			.Returns((string?)null);
 		});
 
-		Client.GroupSetClientsAsync("4dcc4e3b-c699-a04b-7f0c-8260d23c43e1", [ "00:21:6a:7d:74:fc" ]).Wait();
-		ConnectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
+		snapClient.GroupSetClientsAsync("4dcc4e3b-c699-a04b-7f0c-8260d23c43e1", [ "00:21:6a:7d:74:fc" ]).Wait();
+		connectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
 	}
 
 	[Test]
 	public void Test_GroupSetNameAsync()
 	{
-		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
-		Client Client = new Client(ConnectionMock.Object);
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
 
 		var expectedCommand = "{\"params\":{\"id\":\"4dcc4e3b-c699-a04b-7f0c-8260d23c43e1\",\"name\":\"GroundFloor\"},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Group.SetName\"}";
 
-		ConnectionMock.Setup(c => c.Read()).Returns((string?)null);
-		ConnectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		connectionMock.Setup(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
 		{
-			ConnectionMock.SetupSequence(c => c.Read())
+			connectionMock.SetupSequence(c => c.Read())
 			.Returns(ServerResponses.GroupSetNameResponse())
 			.Returns((string?)null);
 		});
 
-		Client.GroupSetNameAsync("4dcc4e3b-c699-a04b-7f0c-8260d23c43e1", "GroundFloor").Wait();
-		ConnectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
+		snapClient.GroupSetNameAsync("4dcc4e3b-c699-a04b-7f0c-8260d23c43e1", "GroundFloor").Wait();
+		connectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
 	}
 
 	[Test]
 	public void Test_ServerGetRpcVersionAsync()
 	{
-		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
-		Client Client = new Client(ConnectionMock.Object);
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
 
 		var expectedCommand = "{\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Server.GetRPCVersion\"}";
 
-		ConnectionMock.Setup(c => c.Read()).Returns((string?)null);
-		ConnectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		connectionMock.Setup(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
 		{
-			ConnectionMock.SetupSequence(c => c.Read())
+			connectionMock.SetupSequence(c => c.Read())
 			.Returns(ServerResponses.ServerGetRpcVersionResponse())
 			.Returns((string?)null);
 		});
 
-		var responseTask = Client.ServerGetRpcVersionAsync();
+		var responseTask = snapClient.ServerGetRpcVersionAsync();
 		var response = responseTask.Result;
-		ConnectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
+		connectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
 
 		Assert.IsNotNull(response);
 
@@ -288,22 +288,22 @@ public class ClientTests
 	[Test]
 	public void Test_ServerGetStatusAsync()
 	{
-		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
-		Client Client = new Client(ConnectionMock.Object);
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
 
 		var expectedCommand = "{\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Server.GetStatus\"}";
 
-		ConnectionMock.Setup(c => c.Read()).Returns((string?)null);
-		ConnectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		connectionMock.Setup(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
 		{
-			ConnectionMock.SetupSequence(c => c.Read())
+			connectionMock.SetupSequence(c => c.Read())
 			.Returns(ServerResponses.ServerGetStatusResponse())
 			.Returns((string?)null);
 		});
 
-		var responseTask = Client.ServerGetStatusAsync();
+		var responseTask = snapClient.ServerGetStatusAsync();
 		var response = responseTask.Result;
-		ConnectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
+		connectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
 
 		Assert.IsNotNull(response);
 
@@ -337,42 +337,42 @@ public class ClientTests
 	[Test]
 	public void Test_ServerDeleteClientAsync()
 	{
-		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
-		Client Client = new Client(ConnectionMock.Object);
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
 
 		var expectedCommand = "{\"params\":{\"id\":\"bla:bla:bla\"},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Server.DeleteClient\"}";
 
-		ConnectionMock.Setup(c => c.Read()).Returns((string?)null);
-		ConnectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		connectionMock.Setup(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
 		{
-			ConnectionMock.SetupSequence(c => c.Read())
+			connectionMock.SetupSequence(c => c.Read())
 				.Returns(ServerResponses.ServerDeleteClientResponse())
 				.Returns((string?)null);
 		});
 
-		Client.ServerDeleteClientAsync("bla:bla:bla").Wait();
-		ConnectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
+		snapClient.ServerDeleteClientAsync("bla:bla:bla").Wait();
+		connectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
 	}
 
 	[Test]
 	public void Test_StreamAddStreamAsync()
 	{
-		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
-		Client Client = new Client(ConnectionMock.Object);
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
 
 		var expectedCommand = "{\"params\":{\"streamUri\":\"pipe:///tmp/snapfifo?name=stream 2\"},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Stream.AddStream\"}";
 
-		ConnectionMock.Setup(c => c.Read()).Returns((string?)null);
-		ConnectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		connectionMock.Setup(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
 		{
-			ConnectionMock.SetupSequence(c => c.Read())
+			connectionMock.SetupSequence(c => c.Read())
 			.Returns(ServerResponses.StreamAddStreamResponse())
 			.Returns((string?)null);
 		});
 
-		var responseTask = Client.StreamAddStreamAsync("pipe:///tmp/snapfifo?name=stream 2");
+		var responseTask = snapClient.StreamAddStreamAsync("pipe:///tmp/snapfifo?name=stream 2");
 		var response = responseTask.Result;
-		ConnectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
+		connectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
 
 		Assert.That(response, Is.EqualTo("stream 2"));
 	}
@@ -380,36 +380,36 @@ public class ClientTests
 	[Test]
 	public void Test_StreamRemoveStreamAsync()
 	{
-		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
-		Client Client = new Client(ConnectionMock.Object);
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
 
 		var expectedCommand = "{\"params\":{\"id\":\"stream 2\"},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Stream.RemoveStream\"}";
 
-		ConnectionMock.Setup(c => c.Read()).Returns((string?)null);
-		ConnectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		connectionMock.Setup(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
 		{
-			ConnectionMock.SetupSequence(c => c.Read())
+			connectionMock.SetupSequence(c => c.Read())
 			.Returns(ServerResponses.StreamRemoveStreamResponse())
 			.Returns((string?)null);
 		});
 
-		Client.StreamRemoveStreamAsync("stream 2").Wait();
-		ConnectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
+		snapClient.StreamRemoveStreamAsync("stream 2").Wait();
+		connectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
 	}
 
 	[Test]
 	public void Test_OnClientConnect()
 	{
-		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
-		Client Client = new Client(ConnectionMock.Object);
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
 
 		var tcs = new TaskCompletionSource<SnapClient>();
-		Client.OnClientConnect = client =>
+		snapClient.OnClientConnect = client =>
 		{
 			tcs.SetResult(client);
 		};
 
-		ConnectionMock.SetupSequence(c => c.Read())
+		connectionMock.SetupSequence(c => c.Read())
 			.Returns(ServerNotifications.ClientConnectNotification())
 			.Returns((string?)null);
 
@@ -420,30 +420,30 @@ public class ClientTests
 	[Test]
 	public void Test_OnClientDisconnect()
 	{
-		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
-		Client Client = new Client(ConnectionMock.Object);
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
 
 		var tcs = new TaskCompletionSource<SnapClient>();
-		Client.OnClientDisconnect = client =>
+		snapClient.OnClientDisconnect = client =>
 		{
 			tcs.SetResult(client);
 		};
 
-		ConnectionMock.SetupSequence(c => c.Read())
+		connectionMock.SetupSequence(c => c.Read())
 			.Returns(ServerNotifications.ClientDisconnectNotification())
 			.Returns((string?)null);
 
-		var client = tcs.Task.Result;
-		ValidateClient(client);
+		var clientResult = tcs.Task.Result;
+		ValidateClient(clientResult);
 	}
 
 	[Test]
 	public void Test_OnClientConnect_Null()
 	{
-		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
-		Client Client = new Client(ConnectionMock.Object);
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		_ = new Client(connectionMock.Object);
 
-		ConnectionMock.SetupSequence(c => c.Read())
+		connectionMock.SetupSequence(c => c.Read())
 			.Returns(ServerNotifications.ClientConnectNotification())
 			.Returns((string?)null);
 	}
@@ -451,16 +451,16 @@ public class ClientTests
 	[Test]
 	public void Test_OnClientVolumeChanged()
 	{
-		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
-		Client Client = new Client(ConnectionMock.Object);
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
 
 		var tcs = new TaskCompletionSource<Params.ClientSetVolume>();
-		Client.OnClientVolumeChanged = volume =>
+		snapClient.OnClientVolumeChanged = volume =>
 		{
 			tcs.SetResult(volume);
 		};
 
-		ConnectionMock.SetupSequence(c => c.Read())
+		connectionMock.SetupSequence(c => c.Read())
 			.Returns(ServerNotifications.ClientVolumeChangedNotification())
 			.Returns((string?)null);
 
@@ -473,16 +473,16 @@ public class ClientTests
 	[Test]
 	public void Test_OnClientLatencyChanged()
 	{
-		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
-		Client Client = new Client(ConnectionMock.Object);
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
 
 		var tcs = new TaskCompletionSource<Params.ClientSetLatency>();
-		Client.OnClientLatencyChanged = latency =>
+		snapClient.OnClientLatencyChanged = latency =>
 		{
 			tcs.SetResult(latency);
 		};
 
-		ConnectionMock.SetupSequence(c => c.Read())
+		connectionMock.SetupSequence(c => c.Read())
 			.Returns(ServerNotifications.ClientLatencyChangedNotification())
 			.Returns((string?)null);
 
@@ -494,16 +494,16 @@ public class ClientTests
 	[Test]
 	public void Test_OnClientNameChanged()
 	{
-		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
-		Client Client = new Client(ConnectionMock.Object);
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
 
 		var tcs = new TaskCompletionSource<Params.ClientSetName>();
-		Client.OnClientNameChanged = name =>
+		snapClient.OnClientNameChanged = name =>
 		{
 			tcs.SetResult(name);
 		};
 
-		ConnectionMock.SetupSequence(c => c.Read())
+		connectionMock.SetupSequence(c => c.Read())
 			.Returns(ServerNotifications.ClientNameChangedNotification())
 			.Returns((string?)null);
 
@@ -516,10 +516,10 @@ public class ClientTests
 	public void Test_StreamOnUpdate()
 	{
 		Mock<IConnection> connectionMock = new Mock<IConnection>();
-		Client client = new Client(connectionMock.Object);
+		Client snapClient = new Client(connectionMock.Object);
 		
 		var tcs = new TaskCompletionSource<Models.Stream>();
-		client.OnStreamUpdate = stream =>
+		snapClient.OnStreamUpdate = stream =>
 		{
 			tcs.SetResult(stream);
 			return Task.CompletedTask;
@@ -547,18 +547,18 @@ public class ClientTests
 	[Test]
 	public void Test_ClientGetStatusAsync_ClientNotFound()
 	{
-		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
-		Client Client = new Client(ConnectionMock.Object);
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
 
-		ConnectionMock.SetupSequence(c => c.Read()).Returns((string?)null);
-		ConnectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		connectionMock.SetupSequence(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
 		{
-			ConnectionMock.SetupSequence(c => c.Read())
+			connectionMock.SetupSequence(c => c.Read())
 				.Returns(ServerErrors.ClientNotFound())
 				.Returns((string?)null);
 		});
 
-		var exception = Assert.ThrowsAsync<Commands.CommandException>(async () => await Client.ClientGetStatusAsync("bla:bla:bla"));
+		var exception = Assert.ThrowsAsync<Commands.CommandException>(async () => await snapClient.ClientGetStatusAsync("bla:bla:bla"));
 		Assert.That(exception.Message, Is.EqualTo("Internal error: Client not found"));
 		
 	}
@@ -566,18 +566,18 @@ public class ClientTests
 	[Test]
 	public void Test_ClientSetVolumeAsync_ClientNotFound()
 	{
-		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
-		Client Client = new Client(ConnectionMock.Object);
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
 
-		ConnectionMock.SetupSequence(c => c.Read()).Returns((string?)null);
-		ConnectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		connectionMock.SetupSequence(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
 		{
-			ConnectionMock.SetupSequence(c => c.Read())
+			connectionMock.SetupSequence(c => c.Read())
 			.Returns(ServerErrors.ClientNotFound())
 			.Returns((string?)null);
 		});
 
-		var responseTask = Client.ClientSetVolumeAsync("bla:bla:bla", 36);
+		var responseTask = snapClient.ClientSetVolumeAsync("bla:bla:bla", 36);
 		var exception = Assert.ThrowsAsync<Commands.CommandException>(async () => await responseTask);
 		Assert.That(exception.Message, Is.EqualTo("Internal error: Client not found"));
 	}
@@ -585,18 +585,18 @@ public class ClientTests
 	[Test]
 	public void Test_ClientSetLatencyAsync_ClientNotFound()
 	{
-		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
-		Client Client = new Client(ConnectionMock.Object);
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
 
-		ConnectionMock.SetupSequence(c => c.Read()).Returns((string?)null);
-		ConnectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		connectionMock.SetupSequence(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
 		{
-			ConnectionMock.SetupSequence(c => c.Read())
+			connectionMock.SetupSequence(c => c.Read())
 			.Returns(ServerErrors.ClientNotFound())
 			.Returns((string?)null);
 		});
 
-		var responseTask = Client.ClientSetLatencyAsync("bla:bla:bla", 10);
+		var responseTask = snapClient.ClientSetLatencyAsync("bla:bla:bla", 10);
 		var exception = Assert.ThrowsAsync<Commands.CommandException>(async () => await responseTask);
 		Assert.That(exception.Message, Is.EqualTo("Internal error: Client not found"));
 	}
@@ -604,18 +604,18 @@ public class ClientTests
 	[Test]
 	public void Test_ClientSetNameAsync_ClientNotFound()
 	{
-		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
-		Client Client = new Client(ConnectionMock.Object);
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
 
-		ConnectionMock.SetupSequence(c => c.Read()).Returns((string?)null);
-		ConnectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		connectionMock.SetupSequence(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
 		{
-			ConnectionMock.SetupSequence(c => c.Read())
+			connectionMock.SetupSequence(c => c.Read())
 			.Returns(ServerErrors.ClientNotFound())
 			.Returns((string?)null);
 		});
 
-		var responseTask = Client.ClientSetNameAsync("bla:bla:bla", "Laptop");
+		var responseTask = snapClient.ClientSetNameAsync("bla:bla:bla", "Laptop");
 		var exception = Assert.ThrowsAsync<Commands.CommandException>(async () => await responseTask);
 		Assert.That(exception.Message, Is.EqualTo("Internal error: Client not found"));
 	}
@@ -623,18 +623,18 @@ public class ClientTests
 	[Test]
 	public void Test_GroupGetStatusAsync_GroupNotFound()
 	{
-		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
-		Client Client = new Client(ConnectionMock.Object);
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
 
-		ConnectionMock.SetupSequence(c => c.Read()).Returns((string?)null);
-		ConnectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		connectionMock.SetupSequence(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
 		{
-			ConnectionMock.SetupSequence(c => c.Read())
+			connectionMock.SetupSequence(c => c.Read())
 			.Returns(ServerErrors.GroupNotFound())
 			.Returns((string?)null);
 		});
 
-		var responseTask = Client.GroupGetStatusAsync("bla:bla:bla");
+		var responseTask = snapClient.GroupGetStatusAsync("bla:bla:bla");
 		var exception = Assert.ThrowsAsync<Commands.CommandException>(async () => await responseTask);
 		Assert.That(exception.Message, Is.EqualTo("Internal error: Group not found"));
 	}
@@ -642,18 +642,18 @@ public class ClientTests
 	[Test]
 	public void Test_GroupSetMuteAsync_GroupNotFound()
 	{
-		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
-		Client Client = new Client(ConnectionMock.Object);
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
 
-		ConnectionMock.SetupSequence(c => c.Read()).Returns((string?)null);
-		ConnectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		connectionMock.SetupSequence(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
 		{
-			ConnectionMock.SetupSequence(c => c.Read())
+			connectionMock.SetupSequence(c => c.Read())
 			.Returns(ServerErrors.GroupNotFound())
 			.Returns((string?)null);
 		});
 
-		var responseTask = Client.GroupSetMuteAsync("bla:bla:bla", true);
+		var responseTask = snapClient.GroupSetMuteAsync("bla:bla:bla", true);
 		var exception = Assert.ThrowsAsync<Commands.CommandException>(async () => await responseTask);
 		Assert.That(exception.Message, Is.EqualTo("Internal error: Group not found"));
 	}
@@ -661,18 +661,18 @@ public class ClientTests
 	[Test]
 	public void Test_GroupSetStreamAsync_GroupNotFound()
 	{
-		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
-		Client Client = new Client(ConnectionMock.Object);
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
 
-		ConnectionMock.SetupSequence(c => c.Read()).Returns((string?)null);
-		ConnectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		connectionMock.SetupSequence(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
 		{
-			ConnectionMock.SetupSequence(c => c.Read())
+			connectionMock.SetupSequence(c => c.Read())
 			.Returns(ServerErrors.GroupNotFound())
 			.Returns((string?)null);
 		});
 
-		var responseTask = Client.GroupSetStreamAsync("bla:bla:bla", "stream 1");
+		var responseTask = snapClient.GroupSetStreamAsync("bla:bla:bla", "stream 1");
 		var exception = Assert.ThrowsAsync<Commands.CommandException>(async () => await responseTask);
 		Assert.That(exception.Message, Is.EqualTo("Internal error: Group not found"));
 	}
@@ -680,18 +680,18 @@ public class ClientTests
 	[Test]
 	public void Test_GroupSetStreamAsync_StreamNotFound()
 	{
-		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
-		Client Client = new Client(ConnectionMock.Object);
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
 
-		ConnectionMock.SetupSequence(c => c.Read()).Returns((string?)null);
-		ConnectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		connectionMock.SetupSequence(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
 		{
-			ConnectionMock.SetupSequence(c => c.Read())
+			connectionMock.SetupSequence(c => c.Read())
 			.Returns(ServerErrors.StreamNotFound())
 			.Returns((string?)null);
 		});
 
-		var responseTask = Client.GroupSetStreamAsync("4dcc4e3b-c699-a04b-7f0c-8260d23c43e1", "stream 1");
+		var responseTask = snapClient.GroupSetStreamAsync("4dcc4e3b-c699-a04b-7f0c-8260d23c43e1", "stream 1");
 		var exception = Assert.ThrowsAsync<Commands.CommandException>(async () => await responseTask);
 		Assert.That(exception.Message, Is.EqualTo("Internal error: Stream not found"));
 	}
@@ -699,18 +699,18 @@ public class ClientTests
 	[Test]
 	public void Test_GroupSetClientsAsync_GroupNotFound()
 	{
-		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
-		Client Client = new Client(ConnectionMock.Object);
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
 
-		ConnectionMock.SetupSequence(c => c.Read()).Returns((string?)null);
-		ConnectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		connectionMock.SetupSequence(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
 		{
-			ConnectionMock.SetupSequence(c => c.Read())
+			connectionMock.SetupSequence(c => c.Read())
 			.Returns(ServerErrors.GroupNotFound())
 			.Returns((string?)null);
 		});
 
-		var responseTask = Client.GroupSetClientsAsync("bla:bla:bla", [ "00:21:6a:7d:74:fc" ]);
+		var responseTask = snapClient.GroupSetClientsAsync("bla:bla:bla", [ "00:21:6a:7d:74:fc" ]);
 		var exception = Assert.ThrowsAsync<Commands.CommandException>(async () => await responseTask);
 		Assert.That(exception.Message, Is.EqualTo("Internal error: Group not found"));
 	}
@@ -718,18 +718,18 @@ public class ClientTests
 	[Test]
 	public void Test_GroupSetNameAsync_GroupNotFound()
 	{
-		Mock<IConnection> ConnectionMock = new Mock<IConnection>();
-		Client Client = new Client(ConnectionMock.Object);
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
 
-		ConnectionMock.SetupSequence(c => c.Read()).Returns((string?)null);
-		ConnectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		connectionMock.SetupSequence(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
 		{
-			ConnectionMock.SetupSequence(c => c.Read())
+			connectionMock.SetupSequence(c => c.Read())
 			.Returns(ServerErrors.GroupNotFound())
 			.Returns((string?)null);
 		});
 
-		var responseTask = Client.GroupSetNameAsync("bla:bla:bla", "GroundFloor");
+		var responseTask = snapClient.GroupSetNameAsync("bla:bla:bla", "GroundFloor");
 		var exception = Assert.ThrowsAsync<Commands.CommandException>(async () => await responseTask);
 		Assert.That(exception.Message, Is.EqualTo("Internal error: Group not found"));
 	}
