@@ -26,13 +26,13 @@ namespace SnapCastNet;
 
 public class Client : IClient
 {
-	private IConnection Connection;
-	private CommandFactory CommandFactory = new CommandFactory();
+	private readonly IConnection Connection;
+	private readonly CommandFactory CommandFactory = new CommandFactory();
 
-	private Mutex CommandMutex = new Mutex();
-	private Thread ResponseReader;
+	private readonly Mutex CommandMutex = new Mutex();
+	private readonly Thread ResponseReader;
 	private bool Listening = true;
-	private Dictionary<uint, IResponseHandler> ResponseHandlers = new Dictionary<uint, IResponseHandler>();
+	private readonly Dictionary<uint, IResponseHandler> ResponseHandlers = new Dictionary<uint, IResponseHandler>();
 
 	public Action<SnapClient>? OnClientConnect { set; get; }
 	public Action<SnapClient>? OnClientDisconnect { set; get; }
