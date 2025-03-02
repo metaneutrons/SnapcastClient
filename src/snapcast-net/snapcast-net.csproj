@@ -13,7 +13,8 @@
     <PackageTags>snapcast</PackageTags>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <VersionPrefix>0.0.2</VersionPrefix>
+    <VersionPrefix>0.0.3</VersionPrefix>
+    <Version>0.0.3</Version>
   </PropertyGroup>
 
   <ItemGroup>
