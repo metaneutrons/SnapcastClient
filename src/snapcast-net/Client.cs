@@ -79,7 +79,18 @@ public class Client : IClient
 		if (response.Length == 0)
 			return;
 
-		var peek = JsonConvert.DeserializeObject<RpcResponsePeek>(response);
+		RpcResponsePeek peek;
+		try
+		{
+			peek = JsonConvert.DeserializeObject<RpcResponsePeek>(response);
+		}
+		catch (JsonReaderException e)
+		{
+			Console.WriteLine($"Error parsing JSON response: {e.Message}");
+			Console.WriteLine($"Response: {response}");
+			return;
+		}
+
 		if (peek.Id != null)
 		{
 			var id = peek.Id.Value;
