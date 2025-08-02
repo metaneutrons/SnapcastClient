@@ -30,15 +30,33 @@ public class ResilientTcpConnection : IConnection, IDisposable
     private readonly int _port;
     private readonly ILogger<ResilientTcpConnection>? _logger;
     private readonly SnapcastClientOptions _options;
-    private readonly object _connectionLock = new object();
-    private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+    private readonly TimeProvider _timeProvider;
+    private readonly object _connectionLock = new();
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
 
     private TcpConnection? _connection;
     private ConnectionState _connectionState = ConnectionState.Disconnected;
     private Timer? _healthCheckTimer;
     private int _reconnectAttempts = 0;
-    private DateTime _lastHealthCheck = DateTime.UtcNow;
+    private DateTime _lastHealthCheck;
     private bool _disposed = false;
+
+    public ResilientTcpConnection(
+        string host,
+        int port,
+        SnapcastClientOptions? options = null,
+        ILogger<ResilientTcpConnection>? logger = null,
+        TimeProvider? timeProvider = null)
+    {
+        _host = host ?? throw new ArgumentNullException(nameof(host));
+        _port = port;
+        _options = options ?? new SnapcastClientOptions();
+        _logger = logger;
+        _timeProvider = timeProvider ?? TimeProvider.System;
+        _lastHealthCheck = _timeProvider.GetUtcNow().DateTime;
+
+        InitializeConnection();
+    }
 
     /// <summary>
     /// Event fired when the connection state changes
@@ -65,18 +83,15 @@ public class ResilientTcpConnection : IConnection, IDisposable
     /// </summary>
     public DateTime LastHealthCheck => _lastHealthCheck;
 
-    public ResilientTcpConnection(
-        string host,
-        int port,
-        SnapcastClientOptions? options = null,
-        ILogger<ResilientTcpConnection>? logger = null
-    )
+    // Constructor body for initialization
+    static ResilientTcpConnection()
     {
-        _host = host ?? throw new ArgumentNullException(nameof(host));
-        _port = port;
-        _options = options ?? new SnapcastClientOptions();
-        _logger = logger;
+        // Static constructor if needed
+    }
 
+    // Instance initialization
+    private void InitializeConnection()
+    {
         _logger?.LogInformation("Creating resilient TCP connection to {Host}:{Port}", _host, _port);
 
         // Start health check timer if enabled
@@ -253,7 +268,7 @@ public class ResilientTcpConnection : IConnection, IDisposable
 
         try
         {
-            _lastHealthCheck = DateTime.UtcNow;
+            _lastHealthCheck = _timeProvider.GetUtcNow().DateTime;
 
             lock (_connectionLock)
             {

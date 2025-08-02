@@ -23,8 +23,8 @@ namespace SnapcastClient;
 
 public class TcpConnection : IConnection, IDisposable
 {
-    private TcpClient Client;
-    private NetworkStream Stream;
+    private readonly TcpClient Client;
+    private readonly NetworkStream Stream;
     private bool _disposed = false;
 
     public TcpConnection(string host, int port)

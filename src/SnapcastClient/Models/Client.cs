@@ -23,83 +23,83 @@ namespace SnapcastClient.Models;
 public struct ClientConfig
 {
     [JsonProperty("instance")]
-    public int Instance;
+    public required int Instance { get; init; }
 
     [JsonProperty("latency")]
-    public int Latency;
+    public required int Latency { get; init; }
 
     [JsonProperty("name")]
-    public string Name;
+    public required string Name { get; init; }
 
     [JsonProperty("volume")]
-    public ClientVolume Volume;
+    public required ClientVolume Volume { get; init; }
 }
 
 public struct ClientHost
 {
     [JsonProperty("arch")]
-    public string Arch;
+    public required string Arch { get; init; }
 
     [JsonProperty("ip")]
-    public string Ip;
+    public required string Ip { get; init; }
 
     [JsonProperty("mac")]
-    public string Mac;
+    public required string Mac { get; init; }
 
     [JsonProperty("name")]
-    public string Name;
+    public required string Name { get; init; }
 
     [JsonProperty("os")]
-    public string Os;
+    public required string Os { get; init; }
 }
 
 public struct ClientVolume
 {
     [JsonProperty("muted")]
-    public bool Muted;
+    public required bool Muted { get; init; }
 
     [JsonProperty("percent")]
-    public int Percent;
+    public required int Percent { get; init; }
 }
 
 public struct LastSeen
 {
     [JsonProperty("sec")]
-    public Int64 Sec;
+    public required long Sec { get; init; }
 
     [JsonProperty("usec")]
-    public int Usec;
+    public required int Usec { get; init; }
 }
 
 public struct SnapClientInfo
 {
     [JsonProperty("name")]
-    public string Name;
+    public required string Name { get; init; }
 
     [JsonProperty("protocolVersion")]
-    public int ProtocolVersion;
+    public required int ProtocolVersion { get; init; }
 
     [JsonProperty("version")]
-    public string Version;
+    public required string Version { get; init; }
 }
 
 public struct SnapClient
 {
     [JsonProperty("config")]
-    public ClientConfig Config;
+    public required ClientConfig Config { get; init; }
 
     [JsonProperty("connected")]
-    public bool Connected;
+    public required bool Connected { get; init; }
 
     [JsonProperty("host")]
-    public ClientHost Host;
+    public required ClientHost Host { get; init; }
 
     [JsonProperty("id")]
-    public string Id;
+    public required string Id { get; init; }
 
     [JsonProperty("lastSeen")]
-    public LastSeen LastSeen;
+    public required LastSeen LastSeen { get; init; }
 
     [JsonProperty("snapclient")]
-    public SnapClientInfo ClientInfo;
+    public required SnapClientInfo ClientInfo { get; init; }
 }

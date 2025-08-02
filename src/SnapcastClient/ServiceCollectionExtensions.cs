@@ -42,8 +42,8 @@ public static class ServiceCollectionExtensions
         Action<SnapcastClientOptions>? configure = null
     )
     {
-        if (string.IsNullOrEmpty(host))
-            throw new ArgumentException("Host cannot be null or empty", nameof(host));
+        if (string.IsNullOrWhiteSpace(host))
+            throw new ArgumentException("Host cannot be null, empty, or whitespace", nameof(host));
 
         if (port <= 0 || port > 65535)
             throw new ArgumentOutOfRangeException(nameof(port), "Port must be between 1 and 65535");
@@ -65,7 +65,8 @@ public static class ServiceCollectionExtensions
             {
                 var options = serviceProvider.GetRequiredService<IOptions<SnapcastClientOptions>>().Value;
                 var logger = serviceProvider.GetService<ILogger<ResilientTcpConnection>>();
-                return new ResilientTcpConnection(host, port, options, logger);
+                var timeProvider = serviceProvider.GetService<TimeProvider>() ?? TimeProvider.System;
+                return new ResilientTcpConnection(host, port, options, logger, timeProvider);
             };
         });
 
@@ -89,8 +90,8 @@ public static class ServiceCollectionExtensions
     /// <returns>The service collection for chaining</returns>
     public static IServiceCollection AddSnapcastClientSimple(this IServiceCollection services, string host, int port)
     {
-        if (string.IsNullOrEmpty(host))
-            throw new ArgumentException("Host cannot be null or empty", nameof(host));
+        if (string.IsNullOrWhiteSpace(host))
+            throw new ArgumentException("Host cannot be null, empty, or whitespace", nameof(host));
 
         if (port <= 0 || port > 65535)
             throw new ArgumentOutOfRangeException(nameof(port), "Port must be between 1 and 65535");

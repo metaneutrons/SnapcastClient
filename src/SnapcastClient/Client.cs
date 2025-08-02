@@ -296,8 +296,8 @@ public class Client : IClient, IDisposable
     /// <returns>The status of the client.</returns>
     public async Task<Models.SnapClient> ClientGetStatusAsync(string id)
     {
-        if (string.IsNullOrEmpty(id))
-            throw new ArgumentException("Client ID cannot be null or empty", nameof(id));
+        if (string.IsNullOrWhiteSpace(id))
+            throw new ArgumentException("Client ID cannot be null, empty, or whitespace", nameof(id));
 
         _logger?.LogInformation("Getting status for client: {ClientId}", id);
 
