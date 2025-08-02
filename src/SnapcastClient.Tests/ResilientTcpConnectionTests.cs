@@ -202,15 +202,24 @@ public class ResilientTcpConnectionTests
     {
         // Arrange
         _options.EnableAutoReconnect = false;
+        _options.MaxRetryAttempts = 3; // Allow multiple attempts to see the difference
         var reconnectAttempts = 0;
+        var attemptDetails = new List<int>();
 
-        using var connection = new ResilientTcpConnection("invalid-host", 1705, _options, _mockLogger.Object);
-        connection.OnReconnectAttempt += (attempt, ex) => reconnectAttempts++;
+        // Use localhost with an invalid port to ensure connection failure
+        using var connection = new ResilientTcpConnection("127.0.0.1", 9999, _options, _mockLogger.Object);
+        connection.OnReconnectAttempt += (attempt, ex) => 
+        {
+            reconnectAttempts++;
+            attemptDetails.Add(attempt);
+        };
 
-        // Act - Wait to see if reconnection attempts are made
-        Thread.Sleep(300);
+        // Act - Wait longer for initial connection attempt to complete
+        Thread.Sleep(2000);
 
-        // Assert - Should have minimal or no reconnect attempts when disabled
-        Assert.That(reconnectAttempts, Is.LessThanOrEqualTo(1)); // Initial connection attempt might still fire event
+        // Assert - When auto-reconnect is disabled, there should be exactly 1 attempt (the initial one)
+        // No retry attempts should be made
+        Assert.That(reconnectAttempts, Is.EqualTo(1), 
+            $"When auto-reconnect is disabled, there should be exactly one connection attempt (the initial one) with no retries. Attempt details: [{string.Join(", ", attemptDetails)}]");
     }
 }

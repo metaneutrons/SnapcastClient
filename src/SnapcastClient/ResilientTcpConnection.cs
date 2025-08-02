@@ -114,7 +114,7 @@ public class ResilientTcpConnection : IConnection, IDisposable
         }
 
         // Initial connection attempt
-        _ = Task.Run(async () => await ConnectAsync());
+        _ = Task.Run(async () => await ConnectAsync(isInitialConnection: true));
     }
 
     /// <summary>
@@ -186,7 +186,7 @@ public class ResilientTcpConnection : IConnection, IDisposable
         {
             if (_options.EnableAutoReconnect)
             {
-                _ = Task.Run(async () => await ConnectAsync());
+                _ = Task.Run(async () => await ConnectAsync(isInitialConnection: false));
                 throw new InvalidOperationException("Connection is not available and reconnection is in progress");
             }
             else
@@ -196,15 +196,19 @@ public class ResilientTcpConnection : IConnection, IDisposable
         }
     }
 
-    private async Task ConnectAsync()
+    private async Task ConnectAsync(bool isInitialConnection = false)
     {
         if (_disposed)
             return;
 
         var attempt = 0;
         var delay = _options.ReconnectDelayMs;
+        
+        // For initial connection, always make at least one attempt
+        // For reconnections, respect the MaxRetryAttempts setting
+        var maxAttempts = isInitialConnection ? 1 : _options.MaxRetryAttempts;
 
-        while (attempt < _options.MaxRetryAttempts && !_disposed)
+        while (attempt < maxAttempts && !_disposed)
         {
             try
             {
@@ -214,7 +218,7 @@ public class ResilientTcpConnection : IConnection, IDisposable
                     _host,
                     _port,
                     attempt + 1,
-                    _options.MaxRetryAttempts
+                    maxAttempts
                 );
 
                 lock (_connectionLock)
@@ -235,7 +239,7 @@ public class ResilientTcpConnection : IConnection, IDisposable
 
                 OnReconnectAttempt?.Invoke(attempt, ex);
 
-                if (attempt >= _options.MaxRetryAttempts)
+                if (attempt >= maxAttempts)
                 {
                     SetConnectionState(ConnectionState.Failed);
                     _logger?.LogError("All connection attempts failed. Giving up.");
@@ -274,7 +278,7 @@ public class ResilientTcpConnection : IConnection, IDisposable
         if (_options.EnableAutoReconnect && _connectionState != ConnectionState.Reconnecting)
         {
             _reconnectAttempts++;
-            _ = Task.Run(async () => await ConnectAsync());
+            _ = Task.Run(async () => await ConnectAsync(isInitialConnection: false));
         }
     }
 
