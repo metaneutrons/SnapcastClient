@@ -57,6 +57,27 @@ Add to your `nuget.config`:
 </packageSourceCredentials>
 ```
 
+## Publishing (for maintainers)
+
+To publish a new version of the package:
+
+### Option 1: Using Environment Variable (Recommended)
+```bash
+export GITHUB_TOKEN=your_github_token
+./publish-to-github.sh
+```
+
+### Option 2: Using Command Line Parameter
+```bash
+./publish-to-github.sh your_github_token
+```
+
+The script will automatically:
+1. Build the project in Release configuration
+2. Run all tests
+3. Create the NuGet package
+4. Publish to GitHub Packages
+
 ## Usage
 
 ```csharp
