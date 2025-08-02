@@ -1,0 +1,393 @@
+name: Release & Pre-Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch to create release from"
+        required: true
+        default: "main"
+        type: choice
+        options:
+          - main
+          - develop
+      tag:
+        description: "Release tag (leave empty to auto-bump via GitVersion)"
+        required: false
+  push:
+    tags:
+      - "v*" # Push events to matching v*, i.e. v1.0.0, v20.15.10
+
+permissions:
+  contents: write # Needed for creating GitHub releases
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history for GitVersion
+          ref: ${{ github.event.inputs.branch }}
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v0.10.2
+        with:
+          versionSpec: "6.x"
+
+      - name: Display release information
+        run: |
+          BRANCH="${{ github.event.inputs.branch }}"
+          echo "🚀 Creating release from branch: $BRANCH"
+          case $BRANCH in
+            main)
+              echo "📦 Release type: Stable Release"
+              ;;
+            develop)
+              echo "🧪 Release type: Beta Pre-release"
+              ;;
+            *)
+              echo "⚠️ Release type: Custom branch release"
+              ;;
+          esac
+
+      - name: Debug git and environment info
+        run: |
+          echo "🔍 Git and Environment Debug Information:"
+          echo "  Current git branch: $(git branch --show-current)"
+          echo "  Git HEAD: $(git rev-parse HEAD)"
+          echo "  Git status: $(git status --porcelain)"
+          echo "  GITHUB_REF: ${{ github.ref }}"
+          echo "  GITHUB_HEAD_REF: ${{ github.head_ref }}"
+          echo "  GITHUB_REF_NAME: ${{ github.ref_name }}"
+          echo "  Selected branch input: ${{ github.event.inputs.branch }}"
+          echo "  Computed branch: ${{ github.event.inputs.branch }}"
+          echo "  Git remote branches:"
+          git branch -r
+          echo ""
+
+      - name: Force checkout to correct branch
+        run: |
+          TARGET_BRANCH="${{ github.event.inputs.branch }}"
+          echo "🔧 Ensuring we're on the correct branch: $TARGET_BRANCH"
+
+          # First, make sure we have the latest refs
+          git fetch origin
+
+          # Check if branch exists locally, if not create it from origin
+          if ! git show-ref --verify --quiet refs/heads/$TARGET_BRANCH; then
+            echo "Creating local branch $TARGET_BRANCH from origin/$TARGET_BRANCH"
+            git checkout -b "$TARGET_BRANCH" "origin/$TARGET_BRANCH"
+          else
+            echo "Checking out existing local branch $TARGET_BRANCH"
+            git checkout "$TARGET_BRANCH"
+            # Make sure it's up to date with origin
+            git reset --hard "origin/$TARGET_BRANCH"
+          fi
+
+          echo "✅ Current branch: $(git branch --show-current)"
+          echo "✅ Current HEAD: $(git rev-parse HEAD)"
+          echo "✅ Origin HEAD for $TARGET_BRANCH: $(git rev-parse origin/$TARGET_BRANCH)"
+
+      - name: Prepare GitVersion environment
+        run: |
+          TARGET_BRANCH="${{ github.event.inputs.branch }}"
+          echo "🔧 Preparing GitVersion for branch: $TARGET_BRANCH"
+
+          # Ensure we're definitely on the target branch for GitVersion
+          CURRENT_BRANCH=$(git branch --show-current)
+          if [[ "$CURRENT_BRANCH" != "$TARGET_BRANCH" ]]; then
+            echo "❌ Branch mismatch! Current: $CURRENT_BRANCH, Expected: $TARGET_BRANCH"
+            exit 1
+          fi
+
+          echo "✅ Confirmed on correct branch: $CURRENT_BRANCH"
+
+      - name: Create git tag if manual tag provided
+        if: github.event.inputs.tag != ''
+        run: |
+          MANUAL_TAG="${{ github.event.inputs.tag }}"
+          echo "🏷️ Creating git tag: $MANUAL_TAG"
+
+          # Configure git user for tagging
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Create the tag at current HEAD
+          git tag -a "$MANUAL_TAG" -m "Release $MANUAL_TAG"
+
+          echo "✅ Created git tag: $MANUAL_TAG"
+          echo "🔍 Tag details:"
+          git show --no-patch --format="  Hash: %H%n  Date: %cd%n  Message: %s" "$MANUAL_TAG"
+
+      - name: Determine version
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v0.10.2
+        with:
+          useConfigFile: true
+          updateAssemblyInfo: true
+          configFilePath: GitVersion.yml
+          additionalArguments: "/overrideconfig mode=ContinuousDeployment /b ${{ github.event.inputs.branch }}"
+        env:
+          # Set GitVersion to use the current checked out branch
+          GITVERSION_OVERRIDE_BRANCH: ${{ github.event.inputs.branch }}
+
+      - name: Display version information
+        run: |
+          SELECTED_BRANCH="${{ github.event.inputs.branch }}"
+          echo "📋 Branch Information:"
+          echo "  Selected branch: $SELECTED_BRANCH"
+          echo "  Current git branch: $(git branch --show-current)"
+          echo "  Git HEAD ref: $(git symbolic-ref HEAD 2>/dev/null || echo 'detached HEAD')"
+          echo ""
+          echo "📋 GitVersion Results:"
+          echo "  SemVer: ${{ steps.gitversion.outputs.semVer }}"
+          echo "  FullSemVer: ${{ steps.gitversion.outputs.fullSemVer }}"
+          echo "  NuGetVersion: ${{ steps.gitversion.outputs.nuGetVersion }}"
+          echo "  BranchName: ${{ steps.gitversion.outputs.branchName }}"
+          echo "  PreReleaseTag: '${{ steps.gitversion.outputs.preReleaseTag }}'"
+          echo "  PreReleaseLabel: '${{ steps.gitversion.outputs.preReleaseLabel }}'"
+          echo "  IsPreRelease: ${{ steps.gitversion.outputs.preReleaseTag != '' }}"
+          echo "  CommitsSinceVersionSource: ${{ steps.gitversion.outputs.commitsSinceVersionSource }}"
+          echo "  VersionSourceSha: ${{ steps.gitversion.outputs.versionSourceSha }}"
+          echo ""
+          echo "🔍 Branch Detection Validation:"
+          echo "  GitVersion detected branch: ${{ steps.gitversion.outputs.branchName }}"
+          echo "  Expected branch: $SELECTED_BRANCH"
+          echo "  Match status: ${{ steps.gitversion.outputs.branchName == github.event.inputs.branch && '✅ CORRECT' || '❌ MISMATCH' }}"
+          echo ""
+          echo "🧪 Expected Version Behavior:"
+          if [[ "$SELECTED_BRANCH" == "main" ]]; then
+            echo "  Expected for main: Stable release (no pre-release suffix)"
+            echo "  Expected format: X.Y.Z (e.g., 1.0.0, 2.3.4)"
+          elif [[ "$SELECTED_BRANCH" == "develop" ]]; then
+            echo "  Expected for develop: Beta pre-release"
+            echo "  Expected format: X.Y.Z-beta.N (e.g., 1.0.0-beta.1)"
+          elif [[ "$SELECTED_BRANCH" =~ ^(fix|feat)/ ]]; then
+            echo "  Expected for $SELECTED_BRANCH: Alpha pre-release"
+            echo "  Expected format: X.Y.Z-alpha.N (e.g., 1.0.0-alpha.1)"
+          else
+            echo "  Expected for $SELECTED_BRANCH: Custom branch behavior"
+          fi
+          echo ""
+          echo "✅ Actual Version Generated: ${{ steps.gitversion.outputs.fullSemVer }}"
+
+      - name: Validate version format matches branch expectations
+        run: |
+          SELECTED_BRANCH="${{ github.event.inputs.branch }}"
+          GENERATED_VERSION="${{ steps.gitversion.outputs.fullSemVer }}"
+          MANUAL_TAG="${{ github.event.inputs.tag }}"
+
+          echo "🔍 Validating version format for branch: $SELECTED_BRANCH"
+          echo "Generated version: $GENERATED_VERSION"
+          echo "Manual tag: ${MANUAL_TAG:-'(none)'}"
+
+          # Validate SemVer format
+          SEMVER_REGEX="^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*))*))?(\+([0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*))?$"
+
+          if [[ ! "$GENERATED_VERSION" =~ $SEMVER_REGEX ]]; then
+            echo "❌ ERROR: Generated version is not valid SemVer format"
+            echo "Actual: $GENERATED_VERSION"
+            exit 1
+          fi
+
+          if [[ "$SELECTED_BRANCH" == "main" ]]; then
+            # For main branch: expect stable release (no pre-release suffix)
+            if [[ "$GENERATED_VERSION" == *"-"* ]]; then
+              echo "❌ ERROR: Main branch should generate stable release without pre-release suffix"
+              echo "Expected: Any stable SemVer (e.g., 1.0.0, 2.3.4)"
+              echo "Actual: $GENERATED_VERSION (contains pre-release suffix)"
+              exit 1
+            fi
+            echo "✅ Version validation passed for main branch - stable SemVer: $GENERATED_VERSION"
+
+          elif [[ "$SELECTED_BRANCH" == "develop" ]]; then
+            # For develop branch: expect beta pre-release
+            if [[ ! "$GENERATED_VERSION" == *"-beta."* ]]; then
+              echo "❌ ERROR: Develop branch should generate beta pre-release"
+              echo "Expected: SemVer with beta label (e.g., 1.0.0-beta.1)"
+              echo "Actual: $GENERATED_VERSION"
+              exit 1
+            fi
+            echo "✅ Version validation passed for develop branch - beta pre-release: $GENERATED_VERSION"
+
+          elif [[ "$SELECTED_BRANCH" =~ ^(fix|feat)/ ]]; then
+            # For fix/* and feat/* branches: expect alpha pre-release
+            if [[ ! "$GENERATED_VERSION" == *"-alpha."* ]]; then
+              echo "❌ ERROR: Fix/Feature branches should generate alpha pre-release"
+              echo "Expected: SemVer with alpha label (e.g., 1.0.0-alpha.1)"
+              echo "Actual: $GENERATED_VERSION"
+              exit 1
+            fi
+            echo "✅ Version validation passed for $SELECTED_BRANCH branch - alpha pre-release: $GENERATED_VERSION"
+
+          else
+            echo "ℹ️ Custom branch '$SELECTED_BRANCH' detected - skipping pre-release label validation"
+            echo "✅ SemVer format validation passed: $GENERATED_VERSION"
+          fi
+
+      - name: Validate manual tag and compare with GitVersion
+        id: validate_tag
+        if: github.event.inputs.tag != ''
+        run: |
+          MANUAL_TAG="${{ github.event.inputs.tag }}"
+          GITVERSION_TAG="v${{ steps.gitversion.outputs.semVer }}"
+
+          # Semver validation
+          SEMVER_REGEX="^v?(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*))*))?(\+([0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*))?$"
+          if ! [[ $MANUAL_TAG =~ $SEMVER_REGEX ]]; then
+            echo "Error: manual tag '$MANUAL_TAG' doesn't comply with SemVer standard"
+            exit 1
+          fi
+
+          # remove leading 'v' for comparison
+          CLEAN_MANUAL_TAG=${MANUAL_TAG#v}
+          CLEAN_GITVERSION_TAG=${GITVERSION_TAG#v}
+
+          # Split versions into components for comparison
+          IFS='.' read -ra MANUAL_PARTS <<< "${CLEAN_MANUAL_TAG%-*}"
+          IFS='.' read -ra GITVERSION_PARTS <<< "${CLEAN_GITVERSION_TAG%-*}"
+
+          # Compare major.minor.patch versions
+          for i in {0..2}; do
+            if [[ ${MANUAL_PARTS[$i]} -lt ${GITVERSION_PARTS[$i]} ]]; then
+              echo "Error: manual tag '$MANUAL_TAG' is lower as GitVersion-tag '$GITVERSION_TAG'"
+              exit 1
+            elif [[ ${MANUAL_PARTS[$i]} -gt ${GITVERSION_PARTS[$i]} ]]; then
+              # Manual tag is higher, which is valid
+              break
+            fi
+          done
+
+          # Check for prerelease comparison if major.minor.patch are equal
+          if [[ "${MANUAL_PARTS[0]}" == "${GITVERSION_PARTS[0]}" && "${MANUAL_PARTS[1]}" == "${GITVERSION_PARTS[1]}" && "${MANUAL_PARTS[2]}" == "${GITVERSION_PARTS[2]}" ]]; then
+            # If GitVersion has no prerelease but manual has, manual is lower (invalid)
+            if [[ "$CLEAN_GITVERSION_TAG" != *"-"* && "$CLEAN_MANUAL_TAG" == *"-"* ]]; then
+              echo "Error: Manual Tag '$MANUAL_TAG' (Prerelease) is lower as GitVersion-tag '$GITVERSION_TAG' (Release)"
+              exit 1
+            fi
+          fi
+
+          echo "Manual tag '$MANUAL_TAG' valid and not lower as GitVersion-tag '$GITVERSION_TAG'"
+        shell: bash
+
+      - name: Restore dependencies
+        run: dotnet restore src/
+
+      - name: Build Release
+        run: dotnet build src/ --configuration Release --no-restore
+
+      - name: Run tests
+        run: dotnet test src/ --configuration Release --no-build --verbosity normal
+
+      - name: Debug version information before pack
+        run: |
+          echo "🔍 Debugging version information before pack:"
+          echo "  Manual tag input: '${{ github.event.inputs.tag }}'"
+          echo "  Computed tag: '${{ steps.release_info.outputs.tag }}'"
+          echo "  Computed version: '${{ steps.release_info.outputs.version }}'"
+          echo "  GitVersion SemVer: '${{ steps.gitversion.outputs.semVer }}'"
+          echo "  GitVersion FullSemVer: '${{ steps.gitversion.outputs.fullSemVer }}'"
+          echo "  GitVersion NuGetVersion: '${{ steps.gitversion.outputs.nuGetVersion }}'"
+          echo "  GitVersion AssemblySemVer: '${{ steps.gitversion.outputs.assemblySemVer }}'"
+          echo ""
+          echo "🔍 Environment variables that might affect pack:"
+          env | grep -i version || echo "No version-related environment variables found"
+          echo ""
+          echo "🔍 Checking project files for hardcoded versions:"
+          find . -name "*.csproj" -exec echo "=== {} ===" \; -exec grep -i version {} \; || echo "No version properties found in .csproj files"
+
+      - name: Pack NuGet package
+        run: |
+          echo "📦 Packing NuGet packages (GitVersion will provide version)..."
+
+          dotnet pack src/SnapcastClient/SnapcastClient.csproj --configuration Release --no-build -o ./artifacts
+
+          echo ""
+          echo "🔍 Generated packages:"
+          ls -la ./artifacts/
+
+          echo ""
+          echo "📋 Package versions generated:"
+          for pkg in ./artifacts/*.nupkg; do
+            if [[ -f "$pkg" ]]; then
+              basename "$pkg"
+            fi
+          done
+
+      - name: Determine release type and tag
+        id: release_info
+        run: |
+          BRANCH="${{ github.event.inputs.branch }}"
+
+          # Use manual tag if provided, otherwise use GitVersion output
+          if [ -n "${{ github.event.inputs.tag }}" ]; then
+            TAG="${{ github.event.inputs.tag }}"
+            # Remove 'v' prefix for version number
+            VERSION=${TAG#v}
+            echo "Using manual tag: $TAG (version: $VERSION)"
+          elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            TAG="${{ github.ref_name }}"
+            VERSION=${TAG#v}
+            echo "Using existing git tag: $TAG (version: $VERSION)"
+          else
+            # Use appropriate GitVersion output based on branch
+            if [[ "$BRANCH" == "main" ]]; then
+              TAG="v${{ steps.gitversion.outputs.semVer }}"
+              VERSION="${{ steps.gitversion.outputs.semVer }}"
+              echo "Main branch - using SemVer: $TAG (version: $VERSION)"
+            else
+              TAG="v${{ steps.gitversion.outputs.fullSemVer }}"
+              VERSION="${{ steps.gitversion.outputs.fullSemVer }}"
+              echo "Non-main branch - using FullSemVer: $TAG (version: $VERSION)"
+            fi
+          fi
+
+          # Determine if it's a prerelease based on tag content OR branch
+          if [[ "$TAG" == *"-"* ]] || [[ "$BRANCH" != "main" ]]; then
+            echo "is_prerelease=true" >> $GITHUB_OUTPUT
+            echo "release_name=Pre-Release" >> $GITHUB_OUTPUT
+            echo "🧪 Creating Pre-Release for branch: $BRANCH (tag: $TAG)"
+          else
+            echo "is_prerelease=false" >> $GITHUB_OUTPUT
+            echo "release_name=Release" >> $GITHUB_OUTPUT
+            echo "📦 Creating stable Release for branch: $BRANCH (tag: $TAG)"
+          fi
+
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+          echo "🔍 Debug - Final version values:"
+          echo "  TAG: $TAG"
+          echo "  VERSION: $VERSION"
+          echo "  GitVersion SemVer: ${{ steps.gitversion.outputs.semVer }}"
+          echo "  GitVersion FullSemVer: ${{ steps.gitversion.outputs.fullSemVer }}"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.release_info.outputs.tag }}
+          files: |
+            ./artifacts/*.nupkg
+            ./artifacts/*.snupkg
+          name: ${{ steps.release_info.outputs.release_name }} ${{ steps.release_info.outputs.tag }}
+          draft: false
+          prerelease: ${{ steps.release_info.outputs.is_prerelease == 'true' }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload NuGet Package
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-package
+          path: |
+            ./artifacts/*.nupkg
+            ./artifacts/*.snupkg
