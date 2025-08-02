@@ -33,6 +33,7 @@ public class ResilientTcpConnection : IConnection, IDisposable
     private readonly TimeProvider _timeProvider;
     private readonly object _connectionLock = new();
     private readonly CancellationTokenSource _cancellationTokenSource = new();
+    private readonly SemaphoreSlim _connectionSemaphore = new(1, 1); // Prevent concurrent connection attempts
 
     private TcpConnection? _connection;
     private ConnectionState _connectionState = ConnectionState.Disconnected;
@@ -40,6 +41,7 @@ public class ResilientTcpConnection : IConnection, IDisposable
     private int _reconnectAttempts = 0;
     private DateTime _lastHealthCheck;
     private bool _disposed = false;
+    private bool _isConnecting = false; // Track if connection attempt is in progress
 
     /// <summary>
     /// Initializes a new instance of the ResilientTcpConnection class.
@@ -131,7 +133,12 @@ public class ResilientTcpConnection : IConnection, IDisposable
         {
             try
             {
-                EnsureConnected();
+                if (!EnsureConnected())
+                {
+                    // Connection not available, throw exception for Send since it's a critical operation
+                    throw new InvalidOperationException("Connection is not available and reconnection is in progress");
+                }
+
                 _connection?.Send(data);
 
                 if (_options.EnableVerboseLogging)
@@ -161,7 +168,14 @@ public class ResilientTcpConnection : IConnection, IDisposable
         {
             try
             {
-                EnsureConnected();
+                if (!EnsureConnected())
+                {
+                    // Connection not available, but reconnection may be in progress
+                    // Log at debug level instead of error to reduce noise
+                    _logger?.LogDebug("Connection not available, reconnection may be in progress");
+                    return null;
+                }
+
                 var result = _connection?.Read();
 
                 if (_options.EnableVerboseLogging && result != null)
@@ -180,20 +194,26 @@ public class ResilientTcpConnection : IConnection, IDisposable
         }
     }
 
-    private void EnsureConnected()
+    private bool EnsureConnected()
     {
         if (_connection == null || _connectionState != ConnectionState.Connected)
         {
             if (_options.EnableAutoReconnect)
             {
-                _ = Task.Run(async () => await ConnectAsync(isInitialConnection: false));
-                throw new InvalidOperationException("Connection is not available and reconnection is in progress");
+                // Start reconnection if not already in progress
+                if (!_isConnecting && _connectionState != ConnectionState.Connecting && _connectionState != ConnectionState.Reconnecting)
+                {
+                    _ = Task.Run(async () => await ConnectAsync(isInitialConnection: false));
+                }
+                // Return false to indicate connection is not available, but don't throw
+                return false;
             }
             else
             {
                 throw new InvalidOperationException("Connection is not available and auto-reconnect is disabled");
             }
         }
+        return true;
     }
 
     private async Task ConnectAsync(bool isInitialConnection = false)
@@ -201,68 +221,91 @@ public class ResilientTcpConnection : IConnection, IDisposable
         if (_disposed)
             return;
 
-        var attempt = 0;
-        var delay = _options.ReconnectDelayMs;
-        
-        // For initial connection, always make at least one attempt
-        // For reconnections, respect the MaxRetryAttempts setting
-        var maxAttempts = isInitialConnection ? 1 : _options.MaxRetryAttempts;
-
-        while (attempt < maxAttempts && !_disposed)
+        // Prevent concurrent connection attempts
+        if (!await _connectionSemaphore.WaitAsync(0)) // Don't wait, just check if available
         {
-            try
+            _logger?.LogDebug("Connection attempt already in progress, skipping");
+            return;
+        }
+
+        try
+        {
+            _isConnecting = true;
+            
+            // Reset attempt counter for initial connections
+            if (isInitialConnection)
             {
-                SetConnectionState(ConnectionState.Connecting);
-                _logger?.LogInformation(
-                    "Attempting to connect to {Host}:{Port} (attempt {Attempt}/{MaxAttempts})",
-                    _host,
-                    _port,
-                    attempt + 1,
-                    maxAttempts
-                );
-
-                lock (_connectionLock)
-                {
-                    _connection?.Dispose();
-                    _connection = new TcpConnection(_host, _port);
-                }
-
-                SetConnectionState(ConnectionState.Connected);
                 _reconnectAttempts = 0;
-                _logger?.LogInformation("Successfully connected to {Host}:{Port}", _host, _port);
-                return;
             }
-            catch (Exception ex)
+
+            var delay = _options.ReconnectDelayMs;
+            var maxAttempts = _options.MaxRetryAttempts;
+
+            while (_reconnectAttempts < maxAttempts && !_disposed)
             {
-                attempt++;
-                _logger?.LogWarning(ex, "Connection attempt {Attempt} failed: {Message}", attempt, ex.Message);
-
-                OnReconnectAttempt?.Invoke(attempt, ex);
-
-                if (attempt >= maxAttempts)
-                {
-                    SetConnectionState(ConnectionState.Failed);
-                    _logger?.LogError("All connection attempts failed. Giving up.");
-                    return;
-                }
-
-                SetConnectionState(ConnectionState.Reconnecting);
-
-                // Exponential backoff
-                if (_options.UseExponentialBackoff)
-                {
-                    delay = Math.Min(delay * 2, _options.MaxReconnectDelayMs);
-                }
-
                 try
                 {
-                    await Task.Delay(delay, _cancellationTokenSource.Token);
+                    SetConnectionState(ConnectionState.Connecting);
+                    _logger?.LogInformation(
+                        "Attempting to connect to {Host}:{Port} (attempt {Attempt}/{MaxAttempts})",
+                        _host,
+                        _port,
+                        _reconnectAttempts + 1,
+                        maxAttempts
+                    );
+
+                    lock (_connectionLock)
+                    {
+                        _connection?.Dispose();
+                        _connection = new TcpConnection(_host, _port);
+                    }
+
+                    SetConnectionState(ConnectionState.Connected);
+                    _reconnectAttempts = 0;
+                    _logger?.LogInformation("Successfully connected to {Host}:{Port}", _host, _port);
+                    return;
                 }
-                catch (OperationCanceledException)
+                catch (Exception ex)
                 {
-                    return; // Cancelled during delay
+                    _reconnectAttempts++;
+                    _logger?.LogWarning(ex, "Connection attempt {Attempt} failed: {Message}", _reconnectAttempts, ex.Message);
+
+                    OnReconnectAttempt?.Invoke(_reconnectAttempts, ex);
+
+                    if (_reconnectAttempts >= maxAttempts)
+                    {
+                        SetConnectionState(ConnectionState.Failed);
+                        _logger?.LogError("All connection attempts failed. Giving up.");
+                        
+                        // Wait before allowing another connection cycle to prevent tight loops
+                        await Task.Delay(TimeSpan.FromSeconds(30), _cancellationTokenSource.Token);
+                        _reconnectAttempts = 0; // Reset for next cycle
+                        return;
+                    }
+
+                    SetConnectionState(ConnectionState.Reconnecting);
+
+                    // Exponential backoff
+                    if (_options.UseExponentialBackoff)
+                    {
+                        delay = Math.Min(delay * 2, _options.MaxReconnectDelayMs);
+                    }
+
+                    try
+                    {
+                        await Task.Delay(delay, _cancellationTokenSource.Token);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        return;
+                    }
                 }
             }
+        }
+        finally
+        {
+            _isConnecting = false;
+            _connectionSemaphore.Release();
         }
     }
 
@@ -275,9 +318,9 @@ public class ResilientTcpConnection : IConnection, IDisposable
             SetConnectionState(ConnectionState.Degraded);
         }
 
-        if (_options.EnableAutoReconnect && _connectionState != ConnectionState.Reconnecting)
+        // Only start reconnection if auto-reconnect is enabled and no connection attempt is in progress
+        if (_options.EnableAutoReconnect && !_isConnecting && _connectionState != ConnectionState.Connecting)
         {
-            _reconnectAttempts++;
             _ = Task.Run(async () => await ConnectAsync(isInitialConnection: false));
         }
     }
@@ -351,6 +394,7 @@ public class ResilientTcpConnection : IConnection, IDisposable
         }
 
         _cancellationTokenSource.Dispose();
+        _connectionSemaphore.Dispose();
         SetConnectionState(ConnectionState.Disconnected);
 
         _logger?.LogInformation("ResilientTcpConnection disposed");

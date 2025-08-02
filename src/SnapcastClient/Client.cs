@@ -187,7 +187,11 @@ public class Client : IClient, IDisposable
             {
                 var response = Connection.Read();
                 if (response == null)
+                {
+                    // Add a small delay to prevent tight CPU loop when connection is not available
+                    Thread.Sleep(100);
                     continue;
+                }
 
                 if (_logger?.IsEnabled(LogLevel.Trace) == true)
                 {
@@ -202,6 +206,9 @@ public class Client : IClient, IDisposable
                 {
                     _logger?.LogError(ex, "Error in response listener thread");
                 }
+                
+                // Add a small delay after exceptions to prevent tight error loops
+                Thread.Sleep(100);
             }
         }
 
