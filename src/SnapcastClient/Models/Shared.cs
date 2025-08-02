@@ -20,20 +20,38 @@ using Newtonsoft.Json;
 
 namespace SnapcastClient.Models;
 
+/// <summary>
+/// Information about a host system
+/// </summary>
 public struct Host
 {
+    /// <summary>
+    /// Gets the system architecture of the host
+    /// </summary>
     [JsonProperty("arch")]
     public string Arch;
 
+    /// <summary>
+    /// Gets the IP address of the host
+    /// </summary>
     [JsonProperty("ip")]
     public string Ip;
 
+    /// <summary>
+    /// Gets the MAC address of the host
+    /// </summary>
     [JsonProperty("mac")]
     public string Mac;
 
+    /// <summary>
+    /// Gets the hostname
+    /// </summary>
     [JsonProperty("name")]
     public string Name;
 
+    /// <summary>
+    /// Gets the operating system of the host
+    /// </summary>
     [JsonProperty("os")]
     public string Os;
 }

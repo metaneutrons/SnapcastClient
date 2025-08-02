@@ -41,6 +41,14 @@ public class ResilientTcpConnection : IConnection, IDisposable
     private DateTime _lastHealthCheck;
     private bool _disposed = false;
 
+    /// <summary>
+    /// Initializes a new instance of the ResilientTcpConnection class.
+    /// </summary>
+    /// <param name="host">The hostname or IP address of the server.</param>
+    /// <param name="port">The port number to connect to.</param>
+    /// <param name="options">Optional configuration options for the connection.</param>
+    /// <param name="logger">Optional logger for diagnostic information.</param>
+    /// <param name="timeProvider">Optional time provider for testing purposes.</param>
     public ResilientTcpConnection(
         string host,
         int port,
@@ -109,6 +117,11 @@ public class ResilientTcpConnection : IConnection, IDisposable
         _ = Task.Run(async () => await ConnectAsync());
     }
 
+    /// <summary>
+    /// Sends data to the server with automatic reconnection if the connection is lost.
+    /// </summary>
+    /// <param name="data">The data to send.</param>
+    /// <exception cref="ObjectDisposedException">Thrown when the connection has been disposed.</exception>
     public void Send(string data)
     {
         if (_disposed)
@@ -135,6 +148,10 @@ public class ResilientTcpConnection : IConnection, IDisposable
         }
     }
 
+    /// <summary>
+    /// Reads data from the server with automatic reconnection if the connection is lost.
+    /// </summary>
+    /// <returns>The data received from the server, or null if no data is available or connection is disposed.</returns>
     public string? Read()
     {
         if (_disposed)
@@ -311,6 +328,9 @@ public class ResilientTcpConnection : IConnection, IDisposable
         }
     }
 
+    /// <summary>
+    /// Releases all resources used by the ResilientTcpConnection.
+    /// </summary>
     public void Dispose()
     {
         if (_disposed)

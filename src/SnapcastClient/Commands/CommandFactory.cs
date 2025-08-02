@@ -18,13 +18,23 @@
 
 namespace SnapcastClient.Commands;
 
+/// <summary>
+/// Factory class for creating Snapcast command objects
+/// </summary>
 public class CommandFactory
 {
     private uint Id = 0;
     private Mutex IdMutex = new Mutex();
 
+    /// <summary>
+    /// Initializes a new instance of the CommandFactory class
+    /// </summary>
     public CommandFactory() { }
 
+    /// <summary>
+    /// Generates a new unique command ID
+    /// </summary>
+    /// <returns>A unique command identifier</returns>
     public uint NewId()
     {
         IdMutex.WaitOne();
@@ -33,6 +43,13 @@ public class CommandFactory
         return id;
     }
 
+    /// <summary>
+    /// Creates a command instance based on the specified command type and parameters
+    /// </summary>
+    /// <typeparam name="T">The type of command parameters</typeparam>
+    /// <param name="commandType">The type of command to create</param>
+    /// <param name="commandParams">The parameters for the command</param>
+    /// <returns>A command instance, or null if the command type is not supported</returns>
     public ICommand? createCommand<T>(CommandType commandType, T commandParams)
     {
         switch (commandType)

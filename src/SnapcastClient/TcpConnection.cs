@@ -21,18 +21,34 @@ using System.Text;
 
 namespace SnapcastClient;
 
+/// <summary>
+/// TCP connection implementation for communicating with the Snapcast server.
+/// </summary>
+/// <summary>
+/// TCP connection implementation for communicating with the Snapcast server.
+/// </summary>
 public class TcpConnection : IConnection, IDisposable
 {
     private readonly TcpClient Client;
     private readonly NetworkStream Stream;
     private bool _disposed = false;
 
+    /// <summary>
+    /// Initializes a new instance of the TcpConnection class.
+    /// </summary>
+    /// <param name="host">The hostname or IP address of the server.</param>
+    /// <param name="port">The port number to connect to.</param>
     public TcpConnection(string host, int port)
     {
         Client = new TcpClient(host, port);
         Stream = Client.GetStream();
     }
 
+    /// <summary>
+    /// Sends data to the server over the TCP connection.
+    /// </summary>
+    /// <param name="data">The data to send.</param>
+    /// <exception cref="ObjectDisposedException">Thrown when the connection has been disposed.</exception>
     public void Send(string data)
     {
         if (_disposed)
@@ -42,6 +58,14 @@ public class TcpConnection : IConnection, IDisposable
         Stream.Write(bytes, 0, bytes.Length);
     }
 
+    /// <summary>
+    /// Reads data from the server over the TCP connection.
+    /// </summary>
+    /// <returns>The data received from the server, or null if no data is available or connection is disposed.</returns>
+    /// <summary>
+    /// Reads data from the server over the TCP connection.
+    /// </summary>
+    /// <returns>The data received from the server, or null if no data is available or connection is disposed.</returns>
     public string? Read()
     {
         if (_disposed)
@@ -68,6 +92,12 @@ public class TcpConnection : IConnection, IDisposable
         return responseData;
     }
 
+    /// <summary>
+    /// Releases all resources used by the TcpConnection.
+    /// </summary>
+    /// <summary>
+    /// Releases all resources used by the TcpConnection.
+    /// </summary>
     public void Dispose()
     {
         if (_disposed)

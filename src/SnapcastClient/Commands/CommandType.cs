@@ -18,25 +18,88 @@
 
 namespace SnapcastClient.Commands;
 
+/// <summary>
+/// Defines the types of commands supported by the Snapcast API
+/// </summary>
 public enum CommandType
 {
+    /// <summary>
+    /// Get the status of a specific client
+    /// </summary>
     CLIENT_GET_STATUS,
+    
+    /// <summary>
+    /// Set the volume of a specific client
+    /// </summary>
     CLIENT_SET_VOLUME,
+    
+    /// <summary>
+    /// Set the latency of a specific client
+    /// </summary>
     CLIENT_SET_LATENCY,
+    
+    /// <summary>
+    /// Set the name of a specific client
+    /// </summary>
     CLIENT_SET_NAME,
 
+    /// <summary>
+    /// Get the status of a specific group
+    /// </summary>
     GROUP_GET_STATUS,
+    
+    /// <summary>
+    /// Set the mute state of a specific group
+    /// </summary>
     GROUP_SET_MUTE,
+    
+    /// <summary>
+    /// Set the stream for a specific group
+    /// </summary>
     GROUP_SET_STREAM,
+    
+    /// <summary>
+    /// Set the clients for a specific group
+    /// </summary>
     GROUP_SET_CLIENTS,
+    
+    /// <summary>
+    /// Set the name of a specific group
+    /// </summary>
     GROUP_SET_NAME,
 
+    /// <summary>
+    /// Get the RPC version of the server
+    /// </summary>
     SERVER_GET_RPC_VERSION,
+    
+    /// <summary>
+    /// Get the status of the server
+    /// </summary>
     SERVER_GET_STATUS,
+    
+    /// <summary>
+    /// Delete a client from the server
+    /// </summary>
     SERVER_DELETE_CLIENT,
 
+    /// <summary>
+    /// Add a new stream to the server
+    /// </summary>
     STREAM_ADD_STREAM,
+    
+    /// <summary>
+    /// Remove a stream from the server
+    /// </summary>
     STREAM_REMOVE_STREAM,
+    
+    /// <summary>
+    /// Control a stream (play, pause, etc.)
+    /// </summary>
     STREAM_CONTROL,
+    
+    /// <summary>
+    /// Set a property of a stream
+    /// </summary>
     STREAM_SET_PROPERTY,
 }

@@ -18,9 +18,20 @@
 
 namespace SnapcastClient;
 
+/// <summary>
+/// Interface for network connections to the Snapcast server.
+/// </summary>
 public interface IConnection
 {
+    /// <summary>
+    /// Sends data to the server.
+    /// </summary>
+    /// <param name="data">The data to send.</param>
     public void Send(string data);
 
+    /// <summary>
+    /// Reads data from the server.
+    /// </summary>
+    /// <returns>The data received from the server, or null if no data is available.</returns>
     public string? Read();
 }

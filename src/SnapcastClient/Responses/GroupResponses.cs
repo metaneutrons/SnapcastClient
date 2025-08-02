@@ -20,32 +20,62 @@ using Newtonsoft.Json;
 
 namespace SnapcastClient.Responses;
 
+/// <summary>
+/// Response containing group status information
+/// </summary>
 public struct GroupStatus
 {
+    /// <summary>
+    /// Gets or sets the group information
+    /// </summary>
     [JsonProperty("group")]
     public Models.Group Group;
 }
 
+/// <summary>
+/// Response for a group mute set operation
+/// </summary>
 public struct GroupMuteSet
 {
+    /// <summary>
+    /// Gets or sets the mute state that was set
+    /// </summary>
     [JsonProperty("mute")]
     public bool Mute;
 }
 
+/// <summary>
+/// Response for a group stream set operation
+/// </summary>
 public struct GroupStreamSet
 {
+    /// <summary>
+    /// Gets or sets the stream ID that was assigned to the group
+    /// </summary>
     [JsonProperty("stream_id")]
     public string StreamId;
 }
 
+/// <summary>
+/// Response for a group clients set operation
+/// </summary>
 public struct GroupClientsSet
 {
+    /// <summary>
+    /// Gets or sets the updated server information with new group configuration
+    /// </summary>
     [JsonProperty("server")]
     public Models.Server Server;
 }
 
+/// <summary>
+/// Response for a group name set operation
+/// </summary>
 public struct GroupNameSet
 {
+    /// <summary>
+    /// Gets or sets the name that was set for the group
+    /// </summary>
     [JsonProperty("name")]
     public string Name;
 }

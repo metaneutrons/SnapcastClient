@@ -18,8 +18,15 @@
 
 namespace SnapcastClient.Commands;
 
+/// <summary>
+/// Exception thrown when a Snapcast command operation fails
+/// </summary>
 public class CommandException : Exception
 {
+    /// <summary>
+    /// Initializes a new instance of the CommandException class with a Snapcast error
+    /// </summary>
+    /// <param name="error">The error details from the Snapcast server</param>
     public CommandException(Responses.Error error)
         : base($"{error.Message}: {error.Data}") { }
 }

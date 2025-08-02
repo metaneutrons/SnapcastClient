@@ -20,20 +20,38 @@ using Newtonsoft.Json;
 
 namespace SnapcastClient.Models;
 
+/// <summary>
+/// Represents a Snapcast group containing multiple clients
+/// </summary>
 public struct Group
 {
+    /// <summary>
+    /// Gets the unique identifier of the group
+    /// </summary>
     [JsonProperty("id")]
     public string Id;
 
+    /// <summary>
+    /// Gets the identifier of the stream assigned to this group
+    /// </summary>
     [JsonProperty("stream_id")]
     public string StreamId;
 
+    /// <summary>
+    /// Gets the list of clients that belong to this group
+    /// </summary>
     [JsonProperty("clients")]
     public List<SnapClient> Clients;
 
+    /// <summary>
+    /// Gets the display name of the group
+    /// </summary>
     [JsonProperty("name")]
     public string Name;
 
+    /// <summary>
+    /// Gets a value indicating whether the group is muted
+    /// </summary>
     [JsonProperty("muted")]
     public bool Muted;
 }

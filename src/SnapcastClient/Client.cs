@@ -25,6 +25,14 @@ using SnapcastClient.Responses;
 
 namespace SnapcastClient;
 
+/// <summary>
+/// Main client for communicating with a Snapcast server via TCP connection.
+/// Provides methods for controlling clients, groups, streams, and server operations.
+/// </summary>
+/// <summary>
+/// Main client for communicating with a Snapcast server via TCP connection.
+/// Provides methods for controlling clients, groups, streams, and server operations.
+/// </summary>
 public class Client : IClient, IDisposable
 {
     private readonly IConnection Connection;
@@ -37,27 +45,98 @@ public class Client : IClient, IDisposable
     private readonly Dictionary<uint, IResponseHandler> ResponseHandlers = new Dictionary<uint, IResponseHandler>();
     private bool _disposed = false;
 
+    /// <summary>
+    /// Event fired when a client connects to the server.
+    /// </summary>
+    /// <summary>
+    /// Event fired when a client connects to the server.
+    /// </summary>
     public Action<SnapClient>? OnClientConnect { set; get; }
+    /// <summary>
+    /// Event fired when a client disconnects from the server.
+    /// </summary>
+    /// <summary>
+    /// Event fired when a client disconnects from the server.
+    /// </summary>
     public Action<SnapClient>? OnClientDisconnect { set; get; }
 
+    /// <summary>
+    /// Event fired when a client's volume changes.
+    /// </summary>
+    /// <summary>
+    /// Event fired when a client\'s volume changes.
+    /// </summary>
     public Action<Params.ClientSetVolume>? OnClientVolumeChanged { set; get; }
 
+    /// <summary>
+    /// Event fired when a client's latency changes.
+    /// </summary>
+    /// <summary>
+    /// Event fired when a client\'s latency changes.
+    /// </summary>
     public Action<Params.ClientSetLatency>? OnClientLatencyChanged { set; get; }
 
+    /// <summary>
+    /// Event fired when a client's name changes.
+    /// </summary>
+    /// <summary>
+    /// Event fired when a client\'s name changes.
+    /// </summary>
     public Action<Params.ClientSetName>? OnClientNameChanged { set; get; }
 
+    /// <summary>
+    /// Event fired when a group's mute status changes.
+    /// </summary>
+    /// <summary>
+    /// Event fired when a group\'s mute status changes.
+    /// </summary>
     public Action<Params.GroupOnMute>? OnGroupMute { set; get; }
 
+    /// <summary>
+    /// Event fired when a group's stream changes.
+    /// </summary>
+    /// <summary>
+    /// Event fired when a group\'s stream changes.
+    /// </summary>
     public Action<Params.GroupOnStreamChanged>? OnGroupStreamChanged { set; get; }
 
+    /// <summary>
+    /// Event fired when a group's name changes.
+    /// </summary>
+    /// <summary>
+    /// Event fired when a group\'s name changes.
+    /// </summary>
     public Action<Params.GroupOnNameChanged>? OnGroupNameChanged { set; get; }
 
+    /// <summary>
+    /// Event fired when stream properties change.
+    /// </summary>
+    /// <summary>
+    /// Event fired when stream properties change.
+    /// </summary>
     public Action<Params.StreamOnProperties>? OnStreamProperties { set; get; }
 
+    /// <summary>
+    /// Event fired when a stream is updated.
+    /// </summary>
+    /// <summary>
+    /// Event fired when a stream is updated.
+    /// </summary>
     public Func<Models.Stream, Task>? OnStreamUpdate { set; get; }
 
+    /// <summary>
+    /// Event fired when the server is updated.
+    /// </summary>
+    /// <summary>
+    /// Event fired when the server is updated.
+    /// </summary>
     public Action<Models.Server>? OnServerUpdate { set; get; }
 
+    /// <summary>
+    /// Initializes a new instance of the Client class.
+    /// </summary>
+    /// <param name="connection">The connection to use for communication with the server.</param>
+    /// <param name="logger">Optional logger for diagnostic information.</param>
     public Client(IConnection connection, ILogger<Client>? logger = null)
     {
         Connection = connection ?? throw new ArgumentNullException(nameof(connection));
@@ -71,6 +150,12 @@ public class Client : IClient, IDisposable
         _logger?.LogDebug("Response reader thread started");
     }
 
+    /// <summary>
+    /// Releases all resources used by the Client.
+    /// </summary>
+    /// <summary>
+    /// Releases all resources used by the Client.
+    /// </summary>
     public void Dispose()
     {
         if (_disposed)

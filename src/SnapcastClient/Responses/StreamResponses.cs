@@ -20,8 +20,14 @@ using Newtonsoft.Json;
 
 namespace SnapcastClient.Responses;
 
+/// <summary>
+/// Response for stream add or remove operations
+/// </summary>
 public struct AddRemove
 {
+    /// <summary>
+    /// Gets or sets the stream identifier that was added or removed
+    /// </summary>
     [JsonProperty("stream_id")]
     public string StreamId;
 }

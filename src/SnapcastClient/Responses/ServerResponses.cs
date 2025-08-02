@@ -20,14 +20,26 @@ using Newtonsoft.Json;
 
 namespace SnapcastClient.Responses;
 
+/// <summary>
+/// Response containing server status information
+/// </summary>
 public struct ServerStatus
 {
+    /// <summary>
+    /// Gets or sets the server information including groups and streams
+    /// </summary>
     [JsonProperty("server")]
     public Models.Server Server;
 }
 
+/// <summary>
+/// Response for a delete client operation
+/// </summary>
 public struct DeleteClient
 {
+    /// <summary>
+    /// Gets or sets the updated server information after client deletion
+    /// </summary>
     [JsonProperty("server")]
     public Models.Server Server;
 }

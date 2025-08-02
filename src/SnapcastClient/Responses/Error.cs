@@ -20,14 +20,26 @@ using Newtonsoft.Json;
 
 namespace SnapcastClient.Responses;
 
+/// <summary>
+/// Represents an error response from the Snapcast server
+/// </summary>
 public struct Error
 {
+    /// <summary>
+    /// Gets or sets the error code
+    /// </summary>
     [JsonProperty("code")]
     public int Code { get; set; }
 
+    /// <summary>
+    /// Gets or sets additional error data
+    /// </summary>
     [JsonProperty("data")]
     public string Data { get; set; }
 
+    /// <summary>
+    /// Gets or sets the error message
+    /// </summary>
     [JsonProperty("message")]
     public string Message { get; set; }
 }

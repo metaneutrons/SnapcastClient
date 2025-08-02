@@ -20,14 +20,26 @@ using Newtonsoft.Json;
 
 namespace SnapcastClient.Params;
 
+/// <summary>
+/// Parameters for deleting a client from the server
+/// </summary>
 public struct ServerDeleteClient
 {
+    /// <summary>
+    /// Gets or sets the unique identifier of the client to delete
+    /// </summary>
     [JsonProperty("id")]
     public string Id { get; set; }
 }
 
+/// <summary>
+/// Parameters for server update notification events
+/// </summary>
 public struct ServerOnUpdate
 {
+    /// <summary>
+    /// Gets or sets the updated server information
+    /// </summary>
     [JsonProperty("server")]
     public Models.Server Server { get; set; }
 }

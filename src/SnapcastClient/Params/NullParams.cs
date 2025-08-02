@@ -18,4 +18,7 @@
 
 namespace SnapcastClient.Params;
 
+/// <summary>
+/// Empty parameter structure for commands that don't require parameters
+/// </summary>
 public struct NullParams { }

@@ -20,17 +20,30 @@ using Newtonsoft.Json;
 
 namespace SnapcastClient.Responses;
 
+/// <summary>
+/// Generic response handler that processes server responses and invokes appropriate callbacks
+/// </summary>
+/// <typeparam name="T">The type of the response result</typeparam>
 public class ResponseHandler<T> : IResponseHandler
 {
     private Action<T>? ResponeCallback;
     private Action<Error>? ErrorCallback;
 
+    /// <summary>
+    /// Initializes a new instance of the ResponseHandler class
+    /// </summary>
+    /// <param name="responseCallback">Callback to invoke when a successful response is received</param>
+    /// <param name="errorCallback">Optional callback to invoke when an error response is received</param>
     public ResponseHandler(Action<T> responseCallback, Action<Error>? errorCallback = null)
     {
         ResponeCallback = responseCallback;
         ErrorCallback = errorCallback;
     }
 
+    /// <summary>
+    /// Handles a successful response by deserializing it and invoking the response callback
+    /// </summary>
+    /// <param name="response">The JSON response string from the server</param>
     public void HandleResponse(string response)
     {
         if (ResponeCallback == null)
@@ -39,6 +52,10 @@ public class ResponseHandler<T> : IResponseHandler
         ResponeCallback(responseObj.Result);
     }
 
+    /// <summary>
+    /// Handles an error response by invoking the error callback if one is set
+    /// </summary>
+    /// <param name="error">The error details from the server</param>
     public void HandleError(Error error)
     {
         ErrorCallback?.Invoke(error);

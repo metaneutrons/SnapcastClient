@@ -18,9 +18,20 @@
 
 namespace SnapcastClient.Responses;
 
+/// <summary>
+/// Interface for handling responses and errors from Snapcast server commands
+/// </summary>
 public interface IResponseHandler
 {
+    /// <summary>
+    /// Handles a successful response from the server
+    /// </summary>
+    /// <param name="response">The JSON response string from the server</param>
     void HandleResponse(string response);
 
+    /// <summary>
+    /// Handles an error response from the server
+    /// </summary>
+    /// <param name="error">The error details from the server</param>
     void HandleError(Error error);
 }

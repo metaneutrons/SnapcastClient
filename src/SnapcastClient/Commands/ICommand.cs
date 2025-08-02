@@ -20,16 +20,32 @@ using Newtonsoft.Json;
 
 namespace SnapcastClient.Commands;
 
+/// <summary>
+/// Interface for Snapcast JSON-RPC commands
+/// </summary>
 public interface ICommand
 {
+    /// <summary>
+    /// Gets the JSON-RPC version identifier
+    /// </summary>
     [JsonProperty("jsonrpc")]
     public string JsonRpc { get; }
 
+    /// <summary>
+    /// Gets or sets the unique command identifier
+    /// </summary>
     [JsonProperty("id")]
     public uint Id { get; set; }
 
+    /// <summary>
+    /// Gets or sets the command method name
+    /// </summary>
     [JsonProperty("method")]
     public string Method { get; set; }
 
+    /// <summary>
+    /// Serializes the command to JSON format
+    /// </summary>
+    /// <returns>JSON representation of the command</returns>
     public abstract string toJson();
 }

@@ -20,71 +20,140 @@ using Newtonsoft.Json;
 
 namespace SnapcastClient.Params;
 
+/// <summary>
+/// Parameters for getting the status of a specific group
+/// </summary>
 public struct GroupGetStatus
 {
+    /// <summary>
+    /// Gets or sets the unique identifier of the group
+    /// </summary>
     [JsonProperty("id")]
     public string Id { get; set; }
 }
 
+/// <summary>
+/// Parameters for setting the mute state of a specific group
+/// </summary>
 public struct GroupSetMute
 {
+    /// <summary>
+    /// Gets or sets the unique identifier of the group
+    /// </summary>
     [JsonProperty("id")]
     public string Id { get; set; }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether to mute the group
+    /// </summary>
     [JsonProperty("mute")]
     public bool Mute { get; set; }
 }
 
+/// <summary>
+/// Parameters for setting the stream of a specific group
+/// </summary>
 public struct GroupSetStream
 {
+    /// <summary>
+    /// Gets or sets the unique identifier of the group
+    /// </summary>
     [JsonProperty("id")]
     public string Id { get; set; }
 
+    /// <summary>
+    /// Gets or sets the stream identifier to assign to the group
+    /// </summary>
     [JsonProperty("stream_id")]
     public string StreamId { get; set; }
 }
 
+/// <summary>
+/// Parameters for setting the clients of a specific group
+/// </summary>
 public struct GroupSetClients
 {
+    /// <summary>
+    /// Gets or sets the unique identifier of the group
+    /// </summary>
     [JsonProperty("id")]
     public string Id { get; set; }
 
+    /// <summary>
+    /// Gets or sets the list of client identifiers to assign to the group
+    /// </summary>
     [JsonProperty("clients")]
     public List<string> Clients { get; set; }
 }
 
+/// <summary>
+/// Parameters for setting the name of a specific group
+/// </summary>
 public struct GroupSetName
 {
+    /// <summary>
+    /// Gets or sets the unique identifier of the group
+    /// </summary>
     [JsonProperty("id")]
     public string Id { get; set; }
 
+    /// <summary>
+    /// Gets or sets the new name for the group
+    /// </summary>
     [JsonProperty("name")]
     public string Name { get; set; }
 }
 
+/// <summary>
+/// Parameters for group mute notification events
+/// </summary>
 public struct GroupOnMute
 {
+    /// <summary>
+    /// Gets or sets the unique identifier of the group
+    /// </summary>
     [JsonProperty("id")]
     public string Id { get; set; }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the group is muted
+    /// </summary>
     [JsonProperty("mute")]
     public bool Mute { get; set; }
 }
 
+/// <summary>
+/// Parameters for group stream change notification events
+/// </summary>
 public struct GroupOnStreamChanged
 {
+    /// <summary>
+    /// Gets or sets the unique identifier of the group
+    /// </summary>
     [JsonProperty("id")]
     public string Id { get; set; }
 
+    /// <summary>
+    /// Gets or sets the stream identifier assigned to the group
+    /// </summary>
     [JsonProperty("stream_id")]
     public string StreamId { get; set; }
 }
 
+/// <summary>
+/// Parameters for group name change notification events
+/// </summary>
 public struct GroupOnNameChanged
 {
+    /// <summary>
+    /// Gets or sets the unique identifier of the group
+    /// </summary>
     [JsonProperty("id")]
     public string Id { get; set; }
 
+    /// <summary>
+    /// Gets or sets the new name of the group
+    /// </summary>
     [JsonProperty("name")]
     public string Name { get; set; }
 }
