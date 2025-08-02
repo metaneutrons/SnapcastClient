@@ -62,9 +62,9 @@ public class ConnectionStateTests
     public void ConnectionState_CanBeCompared()
     {
         // Arrange & Act & Assert
-        Assert.That(ConnectionState.Disconnected, Is.EqualTo(ConnectionState.Disconnected));
         Assert.That(ConnectionState.Connected, Is.Not.EqualTo(ConnectionState.Disconnected));
         Assert.That(ConnectionState.Connecting, Is.Not.EqualTo(ConnectionState.Failed));
+        Assert.That(ConnectionState.Disconnected, Is.Not.EqualTo(ConnectionState.Connected));
     }
 
     [Test]

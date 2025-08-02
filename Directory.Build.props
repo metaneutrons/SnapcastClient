@@ -7,7 +7,7 @@
     <GenerateGitVersionAssemblyInfoFile>true</GenerateGitVersionAssemblyInfoFile>
     
     <!-- Common project settings -->
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <LangVersion>latest</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>

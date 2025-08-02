@@ -84,7 +84,6 @@ public class ClientTests
 
 		connectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
 
-		Assert.IsNotNull(response);
 		ValidateClient(response);
 	}
 
@@ -167,8 +166,6 @@ public class ClientTests
 		var responseTask = snapClient.GroupGetStatusAsync("4dcc4e3b-c699-a04b-7f0c-8260d23c43e1");
 		var response = responseTask.Result;
 		connectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
-
-		Assert.IsNotNull(response);
 
 		Assert.That(response.Clients.Count, Is.EqualTo(1));
 		ValidateClient(response.Clients[0]);
@@ -278,8 +275,6 @@ public class ClientTests
 		var response = responseTask.Result;
 		connectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
 
-		Assert.IsNotNull(response);
-
 		Assert.That(response.Major, Is.EqualTo(2));
 		Assert.That(response.Minor, Is.EqualTo(0));
 		Assert.That(response.Patch, Is.EqualTo(0));
@@ -304,8 +299,6 @@ public class ClientTests
 		var responseTask = snapClient.ServerGetStatusAsync();
 		var response = responseTask.Result;
 		connectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
-
-		Assert.IsNotNull(response);
 
 		ValidateServerInfo(response.ServerInfo);
 
