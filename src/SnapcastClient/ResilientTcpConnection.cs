@@ -221,15 +221,22 @@ public class ResilientTcpConnection : IConnection, IDisposable
         if (_disposed)
             return;
 
-        // Prevent concurrent connection attempts
-        if (!await _connectionSemaphore.WaitAsync(0)) // Don't wait, just check if available
+        // Prevent concurrent connection attempts - wait up to 1 second
+        if (!await _connectionSemaphore.WaitAsync(1000))
         {
-            _logger?.LogDebug("Connection attempt already in progress, skipping");
+            _logger?.LogDebug("Connection attempt already in progress, skipping after timeout");
             return;
         }
 
         try
         {
+            // Double-check if we're already connected after acquiring semaphore
+            if (_connectionState == ConnectionState.Connected)
+            {
+                _logger?.LogDebug("Already connected, skipping connection attempt");
+                return;
+            }
+
             _isConnecting = true;
             
             // Reset attempt counter for initial connections
@@ -241,7 +248,7 @@ public class ResilientTcpConnection : IConnection, IDisposable
             var delay = _options.ReconnectDelayMs;
             var maxAttempts = _options.MaxRetryAttempts;
 
-            while (_reconnectAttempts < maxAttempts && !_disposed)
+            while (_reconnectAttempts < maxAttempts && !_disposed && _connectionState != ConnectionState.Connected)
             {
                 try
                 {
@@ -278,7 +285,14 @@ public class ResilientTcpConnection : IConnection, IDisposable
                         _logger?.LogError("All connection attempts failed. Giving up.");
                         
                         // Wait before allowing another connection cycle to prevent tight loops
-                        await Task.Delay(TimeSpan.FromSeconds(30), _cancellationTokenSource.Token);
+                        try
+                        {
+                            await Task.Delay(TimeSpan.FromSeconds(30), _cancellationTokenSource.Token);
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            return;
+                        }
                         _reconnectAttempts = 0; // Reset for next cycle
                         return;
                     }
