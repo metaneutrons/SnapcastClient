@@ -142,4 +142,29 @@ public class CommandFactoryTests
 		Assert.That(command, Is.Not.Null);
 		Assert.That(command.toJson(), Is.EqualTo("{\"params\":{\"id\":\"stream 2\"},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Stream.RemoveStream\"}"));
 	}
+
+	[Test]
+	public void Test_StreamControl_Command_With_Params()
+	{
+		var parameters = new Dictionary<string, object> { { "offset", 30 } };
+		var command = CommandFactory.createCommand(CommandType.STREAM_CONTROL, new StreamControl { Id = "Spotify", Command = "seek", Params = parameters });
+		Assert.That(command, Is.Not.Null);
+		Assert.That(command.toJson(), Is.EqualTo("{\"params\":{\"id\":\"Spotify\",\"command\":\"seek\",\"params\":{\"offset\":30}},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Stream.Control\"}"));
+	}
+
+	[Test]
+	public void Test_StreamControl_Command_Without_Params()
+	{
+		var command = CommandFactory.createCommand(CommandType.STREAM_CONTROL, new StreamControl { Id = "Spotify", Command = "play", Params = null });
+		Assert.That(command, Is.Not.Null);
+		Assert.That(command.toJson(), Is.EqualTo("{\"params\":{\"id\":\"Spotify\",\"command\":\"play\",\"params\":null},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Stream.Control\"}"));
+	}
+
+	[Test]
+	public void Test_StreamSetProperty_Command()
+	{
+		var command = CommandFactory.createCommand(CommandType.STREAM_SET_PROPERTY, new StreamSetProperty { Id = "Spotify", Property = "volume", Value = 75 });
+		Assert.That(command, Is.Not.Null);
+		Assert.That(command.toJson(), Is.EqualTo("{\"params\":{\"id\":\"Spotify\",\"property\":\"volume\",\"value\":75},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Stream.SetProperty\"}"));
+	}
 }

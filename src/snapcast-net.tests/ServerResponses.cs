@@ -308,4 +308,26 @@ internal class ServerResponses
 	{
 		return StreamAddStreamResponse();
 	}
+
+	public static string StreamControlResponse()
+	{
+		const string response = @"{
+			""id"": 0,
+			""jsonrpc"": ""2.0"",
+			""result"": ""ok""
+		}";
+
+		return response.ReplaceLineEndings("");
+	}
+
+	public static string StreamSetPropertyResponse()
+	{
+		const string response = @"{
+			""id"": 0,
+			""jsonrpc"": ""2.0"",
+			""result"": ""ok""
+		}";
+
+		return response.ReplaceLineEndings("");
+	}
 }

@@ -23,3 +23,9 @@ internal class StreamAddStream(uint id, object commandParams) :
 
 internal class StreamRemoveStream(uint id, object commandParams) :
     CommandWithParams(id, "Stream.RemoveStream", commandParams);
+
+internal class StreamControl(uint id, object commandParams) :
+    CommandWithParams(id, "Stream.Control", commandParams);
+
+internal class StreamSetProperty(uint id, object commandParams) :
+    CommandWithParams(id, "Stream.SetProperty", commandParams);

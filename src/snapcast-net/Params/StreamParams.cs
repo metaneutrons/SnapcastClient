@@ -40,3 +40,36 @@ public struct StreamOnUpdate
 	[JsonProperty("stream")]
 	public Models.Stream Stream;
 }
+
+public struct StreamControl
+{
+	[JsonProperty("id")]
+	public string Id;
+
+	[JsonProperty("command")]
+	public string Command;
+
+	[JsonProperty("params")]
+	public Dictionary<string, object>? Params;
+}
+
+public struct StreamSetProperty
+{
+	[JsonProperty("id")]
+	public string Id;
+
+	[JsonProperty("property")]
+	public string Property;
+
+	[JsonProperty("value")]
+	public object Value;
+}
+
+public struct StreamOnProperties
+{
+	[JsonProperty("id")]
+	public string Id;
+
+	[JsonProperty("properties")]
+	public Models.StreamProperties Properties;
+}

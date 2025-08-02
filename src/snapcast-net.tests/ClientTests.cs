@@ -733,4 +733,456 @@ public class ClientTests
 		var exception = Assert.ThrowsAsync<Commands.CommandException>(async () => await responseTask);
 		Assert.That(exception.Message, Is.EqualTo("Internal error: Group not found"));
 	}
+
+	// Tests for new Stream.Control functionality
+	[Test]
+	public void Test_StreamControl_WithParams()
+	{
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
+
+		var parameters = new Dictionary<string, object> { { "offset", 30 } };
+		var expectedCommand = "{\"params\":{\"id\":\"Spotify\",\"command\":\"seek\",\"params\":{\"offset\":30}},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Stream.Control\"}";
+
+		connectionMock.Setup(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		{
+			connectionMock.SetupSequence(c => c.Read())
+				.Returns(ServerResponses.StreamControlResponse())
+				.Returns((string?)null);
+		});
+
+		snapClient.StreamControlAsync("Spotify", "seek", parameters).Wait();
+		connectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
+	}
+
+	[Test]
+	public void Test_StreamControl_WithoutParams()
+	{
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
+
+		var expectedCommand = "{\"params\":{\"id\":\"Spotify\",\"command\":\"play\",\"params\":null},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Stream.Control\"}";
+
+		connectionMock.Setup(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		{
+			connectionMock.SetupSequence(c => c.Read())
+				.Returns(ServerResponses.StreamControlResponse())
+				.Returns((string?)null);
+		});
+
+		snapClient.StreamControlAsync("Spotify", "play").Wait();
+		connectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
+	}
+
+	[Test]
+	public void Test_StreamSetProperty()
+	{
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
+
+		var expectedCommand = "{\"params\":{\"id\":\"Spotify\",\"property\":\"volume\",\"value\":75},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Stream.SetProperty\"}";
+
+		connectionMock.Setup(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		{
+			connectionMock.SetupSequence(c => c.Read())
+				.Returns(ServerResponses.StreamSetPropertyResponse())
+				.Returns((string?)null);
+		});
+
+		snapClient.StreamSetPropertyAsync("Spotify", "volume", 75).Wait();
+		connectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
+	}
+
+	// Tests for convenience methods
+	[Test]
+	public void Test_StreamPlay()
+	{
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
+
+		var expectedCommand = "{\"params\":{\"id\":\"Spotify\",\"command\":\"play\",\"params\":null},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Stream.Control\"}";
+
+		connectionMock.Setup(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		{
+			connectionMock.SetupSequence(c => c.Read())
+				.Returns(ServerResponses.StreamControlResponse())
+				.Returns((string?)null);
+		});
+
+		snapClient.StreamPlayAsync("Spotify").Wait();
+		connectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
+	}
+
+	[Test]
+	public void Test_StreamPause()
+	{
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
+
+		var expectedCommand = "{\"params\":{\"id\":\"Spotify\",\"command\":\"pause\",\"params\":null},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Stream.Control\"}";
+
+		connectionMock.Setup(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		{
+			connectionMock.SetupSequence(c => c.Read())
+				.Returns(ServerResponses.StreamControlResponse())
+				.Returns((string?)null);
+		});
+
+		snapClient.StreamPauseAsync("Spotify").Wait();
+		connectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
+	}
+
+	[Test]
+	public void Test_StreamNext()
+	{
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
+
+		var expectedCommand = "{\"params\":{\"id\":\"Spotify\",\"command\":\"next\",\"params\":null},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Stream.Control\"}";
+
+		connectionMock.Setup(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		{
+			connectionMock.SetupSequence(c => c.Read())
+				.Returns(ServerResponses.StreamControlResponse())
+				.Returns((string?)null);
+		});
+
+		snapClient.StreamNextAsync("Spotify").Wait();
+		connectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
+	}
+
+	[Test]
+	public void Test_StreamPrevious()
+	{
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
+
+		var expectedCommand = "{\"params\":{\"id\":\"Spotify\",\"command\":\"previous\",\"params\":null},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Stream.Control\"}";
+
+		connectionMock.Setup(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		{
+			connectionMock.SetupSequence(c => c.Read())
+				.Returns(ServerResponses.StreamControlResponse())
+				.Returns((string?)null);
+		});
+
+		snapClient.StreamPreviousAsync("Spotify").Wait();
+		connectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
+	}
+
+	[Test]
+	public void Test_StreamSeek()
+	{
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
+
+		var expectedCommand = "{\"params\":{\"id\":\"Spotify\",\"command\":\"setPosition\",\"params\":{\"position\":120.5}},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Stream.Control\"}";
+
+		connectionMock.Setup(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		{
+			connectionMock.SetupSequence(c => c.Read())
+				.Returns(ServerResponses.StreamControlResponse())
+				.Returns((string?)null);
+		});
+
+		snapClient.StreamSeekAsync("Spotify", 120.5).Wait();
+		connectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
+	}
+
+	[Test]
+	public void Test_StreamSeekByOffset()
+	{
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
+
+		var expectedCommand = "{\"params\":{\"id\":\"Spotify\",\"command\":\"seek\",\"params\":{\"offset\":30.0}},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Stream.Control\"}";
+
+		connectionMock.Setup(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		{
+			connectionMock.SetupSequence(c => c.Read())
+				.Returns(ServerResponses.StreamControlResponse())
+				.Returns((string?)null);
+		});
+
+		snapClient.StreamSeekByOffsetAsync("Spotify", 30.0).Wait();
+		connectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
+	}
+
+	[Test]
+	public void Test_StreamSetVolume()
+	{
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
+
+		var expectedCommand = "{\"params\":{\"id\":\"Spotify\",\"property\":\"volume\",\"value\":80},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Stream.SetProperty\"}";
+
+		connectionMock.Setup(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		{
+			connectionMock.SetupSequence(c => c.Read())
+				.Returns(ServerResponses.StreamSetPropertyResponse())
+				.Returns((string?)null);
+		});
+
+		snapClient.StreamSetVolumeAsync("Spotify", 80).Wait();
+		connectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
+	}
+
+	[Test]
+	public void Test_StreamSetMute()
+	{
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
+
+		var expectedCommand = "{\"params\":{\"id\":\"Spotify\",\"property\":\"mute\",\"value\":true},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Stream.SetProperty\"}";
+
+		connectionMock.Setup(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		{
+			connectionMock.SetupSequence(c => c.Read())
+				.Returns(ServerResponses.StreamSetPropertyResponse())
+				.Returns((string?)null);
+		});
+
+		snapClient.StreamSetMuteAsync("Spotify", true).Wait();
+		connectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
+	}
+
+	[Test]
+	public void Test_StreamSetShuffle()
+	{
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
+
+		var expectedCommand = "{\"params\":{\"id\":\"Spotify\",\"property\":\"shuffle\",\"value\":true},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Stream.SetProperty\"}";
+
+		connectionMock.Setup(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		{
+			connectionMock.SetupSequence(c => c.Read())
+				.Returns(ServerResponses.StreamSetPropertyResponse())
+				.Returns((string?)null);
+		});
+
+		snapClient.StreamSetShuffleAsync("Spotify", true).Wait();
+		connectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
+	}
+
+	[Test]
+	public void Test_StreamSetLoopStatus()
+	{
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
+
+		var expectedCommand = "{\"params\":{\"id\":\"Spotify\",\"property\":\"loopStatus\",\"value\":\"track\"},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Stream.SetProperty\"}";
+
+		connectionMock.Setup(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		{
+			connectionMock.SetupSequence(c => c.Read())
+				.Returns(ServerResponses.StreamSetPropertyResponse())
+				.Returns((string?)null);
+		});
+
+		snapClient.StreamSetLoopStatusAsync("Spotify", "track").Wait();
+		connectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
+	}
+
+	[Test]
+	public void Test_StreamSetRate()
+	{
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
+
+		var expectedCommand = "{\"params\":{\"id\":\"Spotify\",\"property\":\"rate\",\"value\":1.5},\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"Stream.SetProperty\"}";
+
+		connectionMock.Setup(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		{
+			connectionMock.SetupSequence(c => c.Read())
+				.Returns(ServerResponses.StreamSetPropertyResponse())
+				.Returns((string?)null);
+		});
+
+		snapClient.StreamSetRateAsync("Spotify", 1.5).Wait();
+		connectionMock.Verify(c => c.Send(It.Is<string>(s => s == expectedCommand)), Times.Once);
+	}
+
+	// Tests for new notifications
+	[Test]
+	public void Test_OnGroupMute()
+	{
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
+
+		var tcs = new TaskCompletionSource<Params.GroupOnMute>();
+		snapClient.OnGroupMute = groupMute =>
+		{
+			tcs.SetResult(groupMute);
+		};
+
+		connectionMock.SetupSequence(c => c.Read())
+			.Returns(ServerNotifications.GroupOnMuteNotification())
+			.Returns((string?)null);
+
+		var result = tcs.Task.Result;
+		Assert.That(result.Id, Is.EqualTo("4dcc4e3b-c699-a04b-7f0c-8260d23c43e1"));
+		Assert.That(result.Mute, Is.True);
+	}
+
+	[Test]
+	public void Test_OnGroupStreamChanged()
+	{
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
+
+		var tcs = new TaskCompletionSource<Params.GroupOnStreamChanged>();
+		snapClient.OnGroupStreamChanged = groupStreamChanged =>
+		{
+			tcs.SetResult(groupStreamChanged);
+		};
+
+		connectionMock.SetupSequence(c => c.Read())
+			.Returns(ServerNotifications.GroupOnStreamChangedNotification())
+			.Returns((string?)null);
+
+		var result = tcs.Task.Result;
+		Assert.That(result.Id, Is.EqualTo("4dcc4e3b-c699-a04b-7f0c-8260d23c43e1"));
+		Assert.That(result.StreamId, Is.EqualTo("stream 2"));
+	}
+
+	[Test]
+	public void Test_OnGroupNameChanged()
+	{
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
+
+		var tcs = new TaskCompletionSource<Params.GroupOnNameChanged>();
+		snapClient.OnGroupNameChanged = groupNameChanged =>
+		{
+			tcs.SetResult(groupNameChanged);
+		};
+
+		connectionMock.SetupSequence(c => c.Read())
+			.Returns(ServerNotifications.GroupOnNameChangedNotification())
+			.Returns((string?)null);
+
+		var result = tcs.Task.Result;
+		Assert.That(result.Id, Is.EqualTo("4dcc4e3b-c699-a04b-7f0c-8260d23c43e1"));
+		Assert.That(result.Name, Is.EqualTo("GroundFloor"));
+	}
+
+	[Test]
+	public void Test_OnStreamProperties()
+	{
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
+
+		var tcs = new TaskCompletionSource<Params.StreamOnProperties>();
+		snapClient.OnStreamProperties = streamProperties =>
+		{
+			tcs.SetResult(streamProperties);
+		};
+
+		connectionMock.SetupSequence(c => c.Read())
+			.Returns(ServerNotifications.StreamOnPropertiesNotification())
+			.Returns((string?)null);
+
+		var result = tcs.Task.Result;
+		Assert.That(result.Id, Is.EqualTo("stream 1"));
+		Assert.That(result.Properties.CanControl, Is.True);
+		Assert.That(result.Properties.CanGoNext, Is.True);
+		Assert.That(result.Properties.CanGoPrevious, Is.True);
+		Assert.That(result.Properties.CanPause, Is.True);
+		Assert.That(result.Properties.CanPlay, Is.True);
+		Assert.That(result.Properties.CanSeek, Is.True);
+		
+		Assert.That(result.Properties.Metadata, Is.Not.Null);
+		Assert.That(result.Properties.Metadata.Value.Album, Is.EqualTo("Test Album"));
+		Assert.That(result.Properties.Metadata.Value.Artist.Count, Is.EqualTo(1));
+		Assert.That(result.Properties.Metadata.Value.Artist[0], Is.EqualTo("Test Artist"));
+		Assert.That(result.Properties.Metadata.Value.Title, Is.EqualTo("Test Track"));
+		Assert.That(result.Properties.Metadata.Value.ArtUrl, Is.EqualTo("http://example.com/art.jpg"));
+		Assert.That(result.Properties.Metadata.Value.ArtData.Data, Is.EqualTo("base64data"));
+		Assert.That(result.Properties.Metadata.Value.ArtData.extension, Is.EqualTo("jpg"));
+	}
+
+	[Test]
+	public void Test_OnServerUpdate()
+	{
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
+
+		var tcs = new TaskCompletionSource<Models.Server>();
+		snapClient.OnServerUpdate = server =>
+		{
+			tcs.SetResult(server);
+		};
+
+		connectionMock.SetupSequence(c => c.Read())
+			.Returns(ServerNotifications.ServerOnUpdateNotification())
+			.Returns((string?)null);
+
+		var result = tcs.Task.Result;
+		Assert.That(result.Groups.Count, Is.EqualTo(1));
+		Assert.That(result.Streams.Count, Is.EqualTo(1));
+		
+		var group = result.Groups[0];
+		Assert.That(group.Id, Is.EqualTo("4dcc4e3b-c699-a04b-7f0c-8260d23c43e1"));
+		Assert.That(group.StreamId, Is.EqualTo("stream 1"));
+		Assert.That(group.Muted, Is.False);
+		Assert.That(group.Name, Is.EqualTo("Kitchen"));
+		Assert.That(group.Clients.Count, Is.EqualTo(1));
+
+		ValidateClient(group.Clients[0]);
+		ValidateServerInfo(result.ServerInfo);
+	}
+
+	// Error handling tests for new methods
+	[Test]
+	public void Test_StreamControlAsync_StreamNotFound()
+	{
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
+
+		connectionMock.SetupSequence(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		{
+			connectionMock.SetupSequence(c => c.Read())
+				.Returns(ServerErrors.StreamNotFound())
+				.Returns((string?)null);
+		});
+
+		var responseTask = snapClient.StreamControlAsync("nonexistent", "play");
+		var exception = Assert.ThrowsAsync<Commands.CommandException>(async () => await responseTask);
+		Assert.That(exception.Message, Is.EqualTo("Internal error: Stream not found"));
+	}
+
+	[Test]
+	public void Test_StreamSetPropertyAsync_StreamNotFound()
+	{
+		Mock<IConnection> connectionMock = new Mock<IConnection>();
+		Client snapClient = new Client(connectionMock.Object);
+
+		connectionMock.SetupSequence(c => c.Read()).Returns((string?)null);
+		connectionMock.Setup(c => c.Send(It.IsAny<string>())).Callback(() =>
+		{
+			connectionMock.SetupSequence(c => c.Read())
+				.Returns(ServerErrors.StreamNotFound())
+				.Returns((string?)null);
+		});
+
+		var responseTask = snapClient.StreamSetPropertyAsync("nonexistent", "volume", 50);
+		var exception = Assert.ThrowsAsync<Commands.CommandException>(async () => await responseTask);
+		Assert.That(exception.Message, Is.EqualTo("Internal error: Stream not found"));
+	}
 }

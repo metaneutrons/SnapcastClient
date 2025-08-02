@@ -48,6 +48,25 @@ public interface IClient
 
     public Task<string> StreamRemoveStreamAsync(string id);
 
+    public Task StreamControlAsync(string id, string command, Dictionary<string, object>? parameters = null);
+
+    public Task StreamSetPropertyAsync(string id, string property, object value);
+
+    // Convenience methods for common Stream.Control commands
+    public Task StreamPlayAsync(string streamId);
+    public Task StreamPauseAsync(string streamId);
+    public Task StreamNextAsync(string streamId);
+    public Task StreamPreviousAsync(string streamId);
+    public Task StreamSeekAsync(string streamId, double position);
+    public Task StreamSeekByOffsetAsync(string streamId, double offset);
+
+    // Convenience methods for common Stream.SetProperty commands
+    public Task StreamSetVolumeAsync(string streamId, int volume);
+    public Task StreamSetMuteAsync(string streamId, bool mute);
+    public Task StreamSetShuffleAsync(string streamId, bool shuffle);
+    public Task StreamSetLoopStatusAsync(string streamId, string loopStatus);
+    public Task StreamSetRateAsync(string streamId, double rate);
+
 	public Action<Models.SnapClient>? OnClientConnect { set; }
 
 	public Action<Models.SnapClient>? OnClientDisconnect { set; }
@@ -57,4 +76,16 @@ public interface IClient
     public Action<Params.ClientSetLatency>? OnClientLatencyChanged { set; }
 
     public Action<Params.ClientSetName>? OnClientNameChanged { set; }
+
+    public Action<Params.GroupOnMute>? OnGroupMute { set; }
+
+    public Action<Params.GroupOnStreamChanged>? OnGroupStreamChanged { set; }
+
+    public Action<Params.GroupOnNameChanged>? OnGroupNameChanged { set; }
+
+    public Action<Params.StreamOnProperties>? OnStreamProperties { set; }
+
+    public Func<Models.Stream, Task>? OnStreamUpdate { set; }
+
+    public Action<Models.Server>? OnServerUpdate { set; }
 }

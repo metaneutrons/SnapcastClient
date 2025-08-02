@@ -25,3 +25,9 @@ public struct ServerDeleteClient
 	[JsonProperty("id")]
 	public string Id { get; set; }
 }
+
+public struct ServerOnUpdate
+{
+	[JsonProperty("server")]
+	public Models.Server Server { get; set; }
+}

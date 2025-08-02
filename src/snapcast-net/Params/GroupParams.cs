@@ -61,3 +61,30 @@ public struct GroupSetName
 	[JsonProperty("name")]
 	public string Name { get; set; }
 }
+
+public struct GroupOnMute
+{
+	[JsonProperty("id")]
+	public string Id { get; set; }
+
+	[JsonProperty("mute")]
+	public bool Mute { get; set; }
+}
+
+public struct GroupOnStreamChanged
+{
+	[JsonProperty("id")]
+	public string Id { get; set; }
+
+	[JsonProperty("stream_id")]
+	public string StreamId { get; set; }
+}
+
+public struct GroupOnNameChanged
+{
+	[JsonProperty("id")]
+	public string Id { get; set; }
+
+	[JsonProperty("name")]
+	public string Name { get; set; }
+}

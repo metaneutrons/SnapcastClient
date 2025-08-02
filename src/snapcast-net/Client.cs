@@ -43,7 +43,17 @@ public class Client : IClient
 
 	public Action<Params.ClientSetName>? OnClientNameChanged { set; get; }
 	
+	public Action<Params.GroupOnMute>? OnGroupMute { set; get; }
+	
+	public Action<Params.GroupOnStreamChanged>? OnGroupStreamChanged { set; get; }
+	
+	public Action<Params.GroupOnNameChanged>? OnGroupNameChanged { set; get; }
+	
+	public Action<Params.StreamOnProperties>? OnStreamProperties { set; get; }
+	
 	public Func<Models.Stream, Task>? OnStreamUpdate { set; get; }
+	
+	public Action<Models.Server>? OnServerUpdate { set; get; }
 
 	public Client(IConnection connection)
 	{
@@ -151,10 +161,35 @@ public class Client : IClient
 			var notification = JsonConvert.DeserializeObject<RpcNotification<Params.ClientSetName>>(response);
 			OnClientNameChanged?.Invoke(notification.Params);
 		}
+		else if (method == "Group.OnMute")
+		{
+			var notification = JsonConvert.DeserializeObject<RpcNotification<Params.GroupOnMute>>(response);
+			OnGroupMute?.Invoke(notification.Params);
+		}
+		else if (method == "Group.OnStreamChanged")
+		{
+			var notification = JsonConvert.DeserializeObject<RpcNotification<Params.GroupOnStreamChanged>>(response);
+			OnGroupStreamChanged?.Invoke(notification.Params);
+		}
+		else if (method == "Group.OnNameChanged")
+		{
+			var notification = JsonConvert.DeserializeObject<RpcNotification<Params.GroupOnNameChanged>>(response);
+			OnGroupNameChanged?.Invoke(notification.Params);
+		}
+		else if (method == "Stream.OnProperties")
+		{
+			var notification = JsonConvert.DeserializeObject<RpcNotification<Params.StreamOnProperties>>(response);
+			OnStreamProperties?.Invoke(notification.Params);
+		}
 		else if (method == "Stream.OnUpdate")
 		{
 			var notification = JsonConvert.DeserializeObject<RpcNotification<Params.StreamOnUpdate>>(response);
 			OnStreamUpdate?.Invoke(notification.Params.Stream);
+		}
+		else if (method == "Server.OnUpdate")
+		{
+			var notification = JsonConvert.DeserializeObject<RpcNotification<Params.ServerOnUpdate>>(response);
+			OnServerUpdate?.Invoke(notification.Params.Server);
 		}
 	}
 
@@ -409,5 +444,174 @@ public class Client : IClient
 
 		var response = await tcs.Task;
 		return response.StreamId;
+	}
+
+	/// <summary>
+	/// Controls a stream (play, pause, next, previous, seek, etc.).
+	/// </summary>
+	/// <param name="id">The ID of the stream to control.</param>
+	/// <param name="command">The control command to execute.</param>
+	/// <param name="parameters">Optional parameters for the command.</param>
+	/// <returns>A task representing the asynchronous operation.</returns>
+	public async Task StreamControlAsync(string id, string command, Dictionary<string, object>? parameters = null)
+	{
+		var commandObj = CommandFactory.createCommand(CommandType.STREAM_CONTROL, new Params.StreamControl 
+		{ 
+			Id = id, 
+			Command = command, 
+			Params = parameters 
+		});
+		if (commandObj == null)
+			throw new Exception("Failed to create Stream.Control command");
+
+		var tcs = new TaskCompletionSource<string>();
+		Execute(commandObj, new ResponseHandler<string>(tcs.SetResult, e => tcs.SetException(new CommandException(e))));
+		await tcs.Task;
+	}
+
+	/// <summary>
+	/// Sets a property of a stream.
+	/// </summary>
+	/// <param name="id">The ID of the stream.</param>
+	/// <param name="property">The property name to set.</param>
+	/// <param name="value">The value to set for the property.</param>
+	/// <returns>A task representing the asynchronous operation.</returns>
+	public async Task StreamSetPropertyAsync(string id, string property, object value)
+	{
+		var command = CommandFactory.createCommand(CommandType.STREAM_SET_PROPERTY, new Params.StreamSetProperty 
+		{ 
+			Id = id, 
+			Property = property, 
+			Value = value 
+		});
+		if (command == null)
+			throw new Exception("Failed to create Stream.SetProperty command");
+
+		var tcs = new TaskCompletionSource<string>();
+		Execute(command, new ResponseHandler<string>(tcs.SetResult, e => tcs.SetException(new CommandException(e))));
+		await tcs.Task;
+	}
+
+	// Convenience methods for common Stream.Control commands
+
+	/// <summary>
+	/// Plays a stream.
+	/// </summary>
+	/// <param name="streamId">The ID of the stream to play.</param>
+	/// <returns>A task representing the asynchronous operation.</returns>
+	public async Task StreamPlayAsync(string streamId)
+	{
+		await StreamControlAsync(streamId, "play");
+	}
+
+	/// <summary>
+	/// Pauses a stream.
+	/// </summary>
+	/// <param name="streamId">The ID of the stream to pause.</param>
+	/// <returns>A task representing the asynchronous operation.</returns>
+	public async Task StreamPauseAsync(string streamId)
+	{
+		await StreamControlAsync(streamId, "pause");
+	}
+
+	/// <summary>
+	/// Skips to the next track in a stream.
+	/// </summary>
+	/// <param name="streamId">The ID of the stream.</param>
+	/// <returns>A task representing the asynchronous operation.</returns>
+	public async Task StreamNextAsync(string streamId)
+	{
+		await StreamControlAsync(streamId, "next");
+	}
+
+	/// <summary>
+	/// Skips to the previous track in a stream.
+	/// </summary>
+	/// <param name="streamId">The ID of the stream.</param>
+	/// <returns>A task representing the asynchronous operation.</returns>
+	public async Task StreamPreviousAsync(string streamId)
+	{
+		await StreamControlAsync(streamId, "previous");
+	}
+
+	/// <summary>
+	/// Seeks to a specific position in a stream.
+	/// </summary>
+	/// <param name="streamId">The ID of the stream.</param>
+	/// <param name="position">The position to seek to (in seconds).</param>
+	/// <returns>A task representing the asynchronous operation.</returns>
+	public async Task StreamSeekAsync(string streamId, double position)
+	{
+		var parameters = new Dictionary<string, object> { { "position", position } };
+		await StreamControlAsync(streamId, "setPosition", parameters);
+	}
+
+	/// <summary>
+	/// Seeks by an offset in a stream.
+	/// </summary>
+	/// <param name="streamId">The ID of the stream.</param>
+	/// <param name="offset">The offset to seek by (in seconds).</param>
+	/// <returns>A task representing the asynchronous operation.</returns>
+	public async Task StreamSeekByOffsetAsync(string streamId, double offset)
+	{
+		var parameters = new Dictionary<string, object> { { "offset", offset } };
+		await StreamControlAsync(streamId, "seek", parameters);
+	}
+
+	// Convenience methods for common Stream.SetProperty commands
+
+	/// <summary>
+	/// Sets the volume of a stream.
+	/// </summary>
+	/// <param name="streamId">The ID of the stream.</param>
+	/// <param name="volume">The volume level (0-100).</param>
+	/// <returns>A task representing the asynchronous operation.</returns>
+	public async Task StreamSetVolumeAsync(string streamId, int volume)
+	{
+		await StreamSetPropertyAsync(streamId, "volume", volume);
+	}
+
+	/// <summary>
+	/// Sets the mute state of a stream.
+	/// </summary>
+	/// <param name="streamId">The ID of the stream.</param>
+	/// <param name="mute">Whether to mute the stream.</param>
+	/// <returns>A task representing the asynchronous operation.</returns>
+	public async Task StreamSetMuteAsync(string streamId, bool mute)
+	{
+		await StreamSetPropertyAsync(streamId, "mute", mute);
+	}
+
+	/// <summary>
+	/// Sets the shuffle mode of a stream.
+	/// </summary>
+	/// <param name="streamId">The ID of the stream.</param>
+	/// <param name="shuffle">Whether to enable shuffle mode.</param>
+	/// <returns>A task representing the asynchronous operation.</returns>
+	public async Task StreamSetShuffleAsync(string streamId, bool shuffle)
+	{
+		await StreamSetPropertyAsync(streamId, "shuffle", shuffle);
+	}
+
+	/// <summary>
+	/// Sets the loop status of a stream.
+	/// </summary>
+	/// <param name="streamId">The ID of the stream.</param>
+	/// <param name="loopStatus">The loop status ("none", "track", or "playlist").</param>
+	/// <returns>A task representing the asynchronous operation.</returns>
+	public async Task StreamSetLoopStatusAsync(string streamId, string loopStatus)
+	{
+		await StreamSetPropertyAsync(streamId, "loopStatus", loopStatus);
+	}
+
+	/// <summary>
+	/// Sets the playback rate of a stream.
+	/// </summary>
+	/// <param name="streamId">The ID of the stream.</param>
+	/// <param name="rate">The playback rate (1.0 = normal speed).</param>
+	/// <returns>A task representing the asynchronous operation.</returns>
+	public async Task StreamSetRateAsync(string streamId, double rate)
+	{
+		await StreamSetPropertyAsync(streamId, "rate", rate);
 	}
 }
