@@ -1,6 +1,6 @@
 # Enterprise Features
 
-This document describes the enterprise-grade features added to SnapCastNet for production use.
+This document describes the enterprise-grade features added to SnapcastClient for production use.
 
 ## Features Overview
 
@@ -16,7 +16,7 @@ This document describes the enterprise-grade features added to SnapCastNet for p
 
 ```csharp
 using Microsoft.Extensions.Logging;
-using SnapCastNet;
+using SnapcastClient;
 
 // Create logger (optional)
 using var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
@@ -62,7 +62,7 @@ client.Dispose();
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using SnapCastNet;
+using SnapcastClient;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -95,7 +95,7 @@ await host.RunAsync();
 ```csharp
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using SnapCastNet;
+using SnapcastClient;
 
 var services = new ServiceCollection();
 services.AddLogging(logging => logging.AddConsole());
@@ -198,10 +198,10 @@ builder.Services.AddLogging(logging =>
     logging.SetMinimumLevel(LogLevel.Information);
     
     // Enable debug logging for SnapCast components only
-    logging.AddFilter("SnapCastNet", LogLevel.Debug);
+    logging.AddFilter("SnapcastClient", LogLevel.Debug);
     
     // Enable trace logging for detailed network debugging
-    // logging.AddFilter("SnapCastNet.ResilientTcpConnection", LogLevel.Trace);
+    // logging.AddFilter("SnapcastClient.ResilientTcpConnection", LogLevel.Trace);
 });
 ```
 

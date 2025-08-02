@@ -1,4 +1,4 @@
-# Snapcast .NET
+# SnapcastClient
 
 Another .NET API client for [Snapcast](https://github.com/badaix/snapcast).  The current implementation uses a raw TCP connection to communicate with the Snapcast server.  All serialisation and deserialisation of data is handled within the client.
 
@@ -10,17 +10,17 @@ Another .NET API client for [Snapcast](https://github.com/badaix/snapcast).  The
 
 ```bash
 # Add GitHub Packages source
-dotnet nuget add source https://nuget.pkg.github.com/metaneutrons/index.json --name github-snapcast-net
+dotnet nuget add source https://nuget.pkg.github.com/metaneutrons/index.json --name github-snapcast-client
 
 # Install the package
-dotnet add package SnapCastNet --source github-snapcast-net
+dotnet add package SnapcastClient --source github-snapcast-client
 ```
 
 See [PACKAGE.md](PACKAGE.md) for detailed installation instructions and authentication setup.
 
 ## Enterprise Features
 
-SnapCastNet includes enterprise-grade features for production use:
+SnapcastClient includes enterprise-grade features for production use:
 
 - **Connection Resilience**: Automatic reconnection with exponential backoff
 - **Health Monitoring**: Periodic connection health checks  
@@ -35,7 +35,7 @@ See [ENTERPRISE_FEATURES.md](ENTERPRISE_FEATURES.md) for detailed documentation 
 ### Basic Usage
 
 ``` c#
-using SnapCastNet;
+using SnapcastClient;
 
 var connection = new TcpConnection("127.0.0.1", 1705);
 var client = new Client(connection);
@@ -54,7 +54,7 @@ var result = await client.ServerGetRpcVersionAsync();
 ```c#
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using SnapCastNet;
+using SnapcastClient;
 
 var services = new ServiceCollection();
 services.AddLogging(logging => logging.AddConsole());

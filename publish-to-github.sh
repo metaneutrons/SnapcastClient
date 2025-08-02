@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script to manually publish SnapCastNet package to GitHub Packages
+# Script to manually publish SnapcastClient package to GitHub Packages
 # Usage: ./publish-to-github.sh [GITHUB_TOKEN]
 # 
 # The script will use GITHUB_TOKEN environment variable by default.
@@ -43,7 +43,7 @@ echo "Running tests..."
 dotnet test --configuration Release --no-build
 
 echo "Creating package..."
-dotnet pack snapcast-net/snapcast-net.csproj --no-build --configuration Release --output ../packages
+dotnet pack SnapcastClient/SnapcastClient.csproj --no-build --configuration Release --output ../packages
 
 echo "Publishing to GitHub Packages..."
 cd ..
@@ -52,5 +52,5 @@ dotnet nuget push packages/*.nupkg --source "$PACKAGE_SOURCE" --api-key "$TOKEN"
 echo "Package published successfully!"
 echo ""
 echo "To consume this package, users should run:"
-echo "dotnet nuget add source https://nuget.pkg.github.com/metaneutrons/index.json --name github-snapcast-net"
-echo "dotnet add package SnapCastNet --source github-snapcast-net"
+echo "dotnet nuget add source https://nuget.pkg.github.com/metaneutrons/index.json --name github-snapcast-client"
+echo "dotnet add package SnapcastClient --source github-snapcast-client"

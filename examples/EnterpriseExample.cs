@@ -1,12 +1,12 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using SnapCastNet;
+using SnapcastClient;
 
-namespace SnapCastNet.Examples;
+namespace SnapcastClient.Examples;
 
 /// <summary>
-/// Example demonstrating enterprise features of SnapCastNet
+/// Example demonstrating enterprise features of SnapcastClient
 /// </summary>
 public class EnterpriseExample
 {
@@ -22,7 +22,7 @@ public class EnterpriseExample
             logging.SetMinimumLevel(LogLevel.Information);
             
             // Enable debug logging for SnapCast components
-            logging.AddFilter("SnapCastNet", LogLevel.Debug);
+            logging.AddFilter("SnapcastClient", LogLevel.Debug);
         });
 
         // Add Snapcast client with enterprise features

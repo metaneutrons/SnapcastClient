@@ -1,19 +1,19 @@
-# SnapCastNet Package Installation
+# SnapcastClient Package Installation
 
-This document explains how to install and use the SnapCastNet package from GitHub Packages.
+This document explains how to install and use the SnapcastClient package from GitHub Packages.
 
 ## Installation
 
 ### Step 1: Add GitHub Packages Source
 
 ```bash
-dotnet nuget add source https://nuget.pkg.github.com/metaneutrons/index.json --name github-snapcast-net
+dotnet nuget add source https://nuget.pkg.github.com/metaneutrons/index.json --name github-snapcast-client
 ```
 
 ### Step 2: Install the Package
 
 ```bash
-dotnet add package SnapCastNet --source github-snapcast-net
+dotnet add package SnapcastClient --source github-snapcast-client
 ```
 
 ### Alternative: Using PackageReference
@@ -21,7 +21,7 @@ dotnet add package SnapCastNet --source github-snapcast-net
 Add this to your `.csproj` file:
 
 ```xml
-<PackageReference Include="SnapCastNet" Version="1.0.0" />
+<PackageReference Include="SnapcastClient" Version="1.0.0" />
 ```
 
 And add this `nuget.config` to your project root:
@@ -31,7 +31,7 @@ And add this `nuget.config` to your project root:
 <configuration>
   <packageSources>
     <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
-    <add key="github-snapcast-net" value="https://nuget.pkg.github.com/metaneutrons/index.json" />
+    <add key="github-snapcast-client" value="https://nuget.pkg.github.com/metaneutrons/index.json" />
   </packageSources>
 </configuration>
 ```
@@ -50,10 +50,10 @@ Add to your `nuget.config`:
 
 ```xml
 <packageSourceCredentials>
-  <github-snapcast-net>
+  <github-snapcast-client>
     <add key="Username" value="your_github_username" />
     <add key="ClearTextPassword" value="your_github_token" />
-  </github-snapcast-net>
+  </github-snapcast-client>
 </packageSourceCredentials>
 ```
 
@@ -81,7 +81,7 @@ The script will automatically:
 ## Usage
 
 ```csharp
-using SnapCastNet;
+using SnapcastClient;
 
 var connection = new TcpConnection("127.0.0.1", 1705);
 var client = new Client(connection);
@@ -97,10 +97,10 @@ await client.StreamSetVolumeAsync("Spotify", 80);
 
 ## Package Information
 
-- **Package ID**: SnapCastNet
+- **Package ID**: SnapcastClient
 - **Version**: 1.0.0
 - **Target Framework**: .NET 8.0
-- **Repository**: https://github.com/metaneutrons/snapcast-net
+- **Repository**: https://github.com/metaneutrons/SnapcastClient
 - **License**: GPL-3.0
 
 ## Features

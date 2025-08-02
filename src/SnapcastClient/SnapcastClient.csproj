@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>SnapcastClient</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>SnapcastClient</Title>
+    <Description>SnapcastClient - .NET Snapcast API Client with complete JSON-RPC API support</Description>
+    <PackageProjectUrl>https://github.com/metaneutrons/SnapcastClient</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/metaneutrons/SnapcastClient</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>snapcast;audio;multiroom;streaming;json-rpc</PackageTags>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <VersionPrefix>1.1.0</VersionPrefix>
+    <Version>1.1.0</Version>
+    <Authors>metaneutrons</Authors>
+    <Company>metaneutrons</Company>
+    <PackageId>SnapcastClient</PackageId>
+    <RepositoryBranch>mainline</RepositoryBranch>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+</Project>
