@@ -1,0 +1,44 @@
+<Project>
+  <PropertyGroup>
+    <!-- GitVersion configuration -->
+    <GitVersion_Enabled>true</GitVersion_Enabled>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <GenerateGitVersionInformationFile>true</GenerateGitVersionInformationFile>
+    <GenerateGitVersionAssemblyInfoFile>true</GenerateGitVersionAssemblyInfoFile>
+    
+    <!-- Common project settings -->
+    <TargetFramework>net8.0</TargetFramework>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    
+    <!-- Analysis settings -->
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <CodeAnalysisTreatWarningsAsErrors>false</CodeAnalysisTreatWarningsAsErrors>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest</AnalysisLevel>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- Package metadata for NuGet -->
+    <Authors>metaneutrons</Authors>
+    <Company>metaneutrons</Company>
+    <Copyright>Copyright © $([System.DateTime]::Now.Year) metaneutrons</Copyright>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <NeutralLanguage>en</NeutralLanguage>
+    <RepositoryUrl>https://github.com/metaneutrons/SnapcastClient</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/metaneutrons/SnapcastClient</PackageProjectUrl>
+    <PackageReleaseNotes>https://github.com/metaneutrons/SnapcastClient/releases</PackageReleaseNotes>
+    <PackageTags>snapcast;audio;multiroom;streaming;json-rpc</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="GitVersion.MsBuild" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)LICENSE" Pack="true" PackagePath="\" />
+  </ItemGroup>
+</Project>
