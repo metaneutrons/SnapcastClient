@@ -18,9 +18,21 @@ dotnet add package SnapCastNet --source github-snapcast-net
 
 See [PACKAGE.md](PACKAGE.md) for detailed installation instructions and authentication setup.
 
+## Enterprise Features
+
+SnapCastNet includes enterprise-grade features for production use:
+
+- **Connection Resilience**: Automatic reconnection with exponential backoff
+- **Health Monitoring**: Periodic connection health checks  
+- **Comprehensive Logging**: Structured logging with Microsoft.Extensions.Logging
+- **Dependency Injection**: Full DI container integration
+- **Configuration Management**: Options pattern support
+
+See [ENTERPRISE_FEATURES.md](ENTERPRISE_FEATURES.md) for detailed documentation and examples.
+
 ## Usage
 
-### Initialise
+### Basic Usage
 
 ``` c#
 using SnapCastNet;
@@ -35,6 +47,30 @@ var result = await client.ServerGetRpcVersionAsync();
 //   Minor: 0,
 //   Patch: 0
 // }
+```
+
+### Enterprise Usage with Dependency Injection
+
+```c#
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using SnapCastNet;
+
+var services = new ServiceCollection();
+services.AddLogging(logging => logging.AddConsole());
+
+// Add resilient Snapcast client
+services.AddSnapcastClient("127.0.0.1", 1705, options =>
+{
+    options.EnableAutoReconnect = true;
+    options.MaxRetryAttempts = 5;
+    options.HealthCheckIntervalMs = 30000;
+});
+
+var serviceProvider = services.BuildServiceProvider();
+var client = serviceProvider.GetRequiredService<IClient>();
+
+var result = await client.ServerGetRpcVersionAsync();
 ```
 
 ## Implemented Commands

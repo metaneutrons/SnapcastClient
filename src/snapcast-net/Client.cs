@@ -21,18 +21,21 @@ using SnapCastNet.Commands;
 using SnapCastNet.Models;
 using SnapCastNet.Params;
 using SnapCastNet.Responses;
+using Microsoft.Extensions.Logging;
 
 namespace SnapCastNet;
 
-public class Client : IClient
+public class Client : IClient, IDisposable
 {
 	private readonly IConnection Connection;
+	private readonly ILogger<Client>? _logger;
 	private readonly CommandFactory CommandFactory = new CommandFactory();
 
 	private readonly Mutex CommandMutex = new Mutex();
 	private readonly Thread ResponseReader;
 	private bool Listening = true;
 	private readonly Dictionary<uint, IResponseHandler> ResponseHandlers = new Dictionary<uint, IResponseHandler>();
+	private bool _disposed = false;
 
 	public Action<SnapClient>? OnClientConnect { set; get; }
 	public Action<SnapClient>? OnClientDisconnect { set; get; }
@@ -55,33 +58,71 @@ public class Client : IClient
 	
 	public Action<Models.Server>? OnServerUpdate { set; get; }
 
-	public Client(IConnection connection)
+	public Client(IConnection connection, ILogger<Client>? logger = null)
 	{
-		Connection = connection;
+		Connection = connection ?? throw new ArgumentNullException(nameof(connection));
+		_logger = logger;
+
+		_logger?.LogInformation("Initializing Snapcast client");
 
         ResponseReader = new Thread(ListenForResponses)
         {
             Name = "SnapCastResponseReader"
         };
         ResponseReader.Start();
+        
+        _logger?.LogDebug("Response reader thread started");
 	}
 
-	~Client()
+	public void Dispose()
 	{
+		if (_disposed) return;
+		
+		_logger?.LogInformation("Disposing Snapcast client");
+		
 		Listening = false;
-		ResponseReader.Join();
+		ResponseReader?.Join(TimeSpan.FromSeconds(5)); // Wait up to 5 seconds for thread to finish
+		
+		if (Connection is IDisposable disposableConnection)
+		{
+			disposableConnection.Dispose();
+		}
+		
+		CommandMutex?.Dispose();
+		_disposed = true;
+		
+		_logger?.LogDebug("Snapcast client disposed");
 	}
 
 	private void ListenForResponses()
 	{
+		_logger?.LogDebug("Starting response listener thread");
+		
 		while (Listening)
 		{
-			var response = Connection.Read();
-			if (response == null)
-				continue;
+			try
+			{
+				var response = Connection.Read();
+				if (response == null)
+					continue;
 
-			response.Split('\n').ToList().ForEach(HandleResponse);
+				if (_logger?.IsEnabled(LogLevel.Trace) == true)
+				{
+					_logger.LogTrace("Received response: {Response}", response);
+				}
+
+				response.Split('\n').ToList().ForEach(HandleResponse);
+			}
+			catch (Exception ex)
+			{
+				if (Listening) // Only log if we're still supposed to be listening
+				{
+					_logger?.LogError(ex, "Error in response listener thread");
+				}
+			}
 		}
+		
+		_logger?.LogDebug("Response listener thread stopped");
 	}
 
 	private void HandleResponse(string response)
@@ -96,14 +137,15 @@ public class Client : IClient
 		}
 		catch (JsonReaderException e)
 		{
-			Console.WriteLine($"Error parsing JSON response: {e.Message}");
-			Console.WriteLine($"Response: {response}");
+			_logger?.LogError(e, "Error parsing JSON response: {Response}", response);
 			return;
 		}
 
 		if (peek.Id != null)
 		{
 			var id = peek.Id.Value;
+			_logger?.LogDebug("Handling response for command ID: {CommandId}", id);
+			
 			CommandMutex.WaitOne();
 
 			IResponseHandler? responseHandler = null;
@@ -114,22 +156,37 @@ public class Client : IClient
 			catch (KeyNotFoundException)
 			{
 				CommandMutex.ReleaseMutex();
-				var responseHandlerIds = new List<int>{};
-				foreach (var key in ResponseHandlers.Keys)
-					Console.WriteLine(key);
-				throw;
+				_logger?.LogWarning("No response handler found for command ID: {CommandId}. Available handlers: {HandlerIds}", 
+					id, string.Join(", ", ResponseHandlers.Keys));
+				return;
 			}
 
-			if (peek.Error == null)
-				responseHandler.HandleResponse(response);
-			else
-				responseHandler.HandleError(peek.Error.Value);
-
-            ResponseHandlers.Remove(id);
-			CommandMutex.ReleaseMutex();
+			try
+			{
+				if (peek.Error == null)
+				{
+					responseHandler.HandleResponse(response);
+					_logger?.LogDebug("Successfully handled response for command ID: {CommandId}", id);
+				}
+				else
+				{
+					_logger?.LogWarning("Command ID {CommandId} returned error: {Error}", id, peek.Error.Value);
+					responseHandler.HandleError(peek.Error.Value);
+				}
+			}
+			catch (Exception ex)
+			{
+				_logger?.LogError(ex, "Error handling response for command ID: {CommandId}", id);
+			}
+			finally
+			{
+				ResponseHandlers.Remove(id);
+				CommandMutex.ReleaseMutex();
+			}
 		}
 		else
 		{
+			_logger?.LogDebug("Handling notification: {Method}", peek.Method);
 			HandleNotification(peek.Method, response);
 		}
 	}
@@ -195,10 +252,34 @@ public class Client : IClient
 
 	private void Execute(ICommand command, IResponseHandler responseHandler)
 	{
+		if (_disposed) throw new ObjectDisposedException(nameof(Client));
+		
+		_logger?.LogDebug("Executing command: {CommandType} with ID: {CommandId}", command.GetType().Name, command.Id);
+		
 		CommandMutex.WaitOne();
-		ResponseHandlers.Add(command.Id, responseHandler);
-		Connection.Send(command.toJson());
-		CommandMutex.ReleaseMutex();
+		try
+		{
+			ResponseHandlers.Add(command.Id, responseHandler);
+			var json = command.toJson();
+			
+			if (_logger?.IsEnabled(LogLevel.Trace) == true)
+			{
+				_logger.LogTrace("Sending command JSON: {Json}", json);
+			}
+			
+			Connection.Send(json);
+			_logger?.LogDebug("Command sent successfully: {CommandId}", command.Id);
+		}
+		catch (Exception ex)
+		{
+			_logger?.LogError(ex, "Failed to execute command: {CommandType} with ID: {CommandId}", command.GetType().Name, command.Id);
+			ResponseHandlers.Remove(command.Id);
+			throw;
+		}
+		finally
+		{
+			CommandMutex.ReleaseMutex();
+		}
 	}
 
 	/// <summary>
@@ -208,15 +289,31 @@ public class Client : IClient
 	/// <returns>The status of the client.</returns>
 	public async Task<Models.SnapClient> ClientGetStatusAsync(string id)
 	{
+		if (string.IsNullOrEmpty(id)) throw new ArgumentException("Client ID cannot be null or empty", nameof(id));
+		
+		_logger?.LogInformation("Getting status for client: {ClientId}", id);
+		
 		var command = CommandFactory.createCommand(CommandType.CLIENT_GET_STATUS, new Params.ClientGetStatus { Id = id });
 		if (command == null)
+		{
+			_logger?.LogError("Failed to create Client.GetStatus command for client: {ClientId}", id);
 			throw new Exception("Failed to create Client.GetStatus command");
+		}
 
 		var tcs = new TaskCompletionSource<ClientStatus>();
 		Execute(command, new ResponseHandler<ClientStatus>(tcs.SetResult, e => tcs.SetException(new CommandException(e))));
 
-		var response = await tcs.Task;
-		return response.Client;
+		try
+		{
+			var response = await tcs.Task;
+			_logger?.LogDebug("Successfully retrieved status for client: {ClientId}", id);
+			return response.Client;
+		}
+		catch (Exception ex)
+		{
+			_logger?.LogError(ex, "Failed to get status for client: {ClientId}", id);
+			throw;
+		}
 	}
 
 	/// <summary>

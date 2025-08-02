@@ -21,10 +21,11 @@ using System.Text;
 
 namespace SnapCastNet;
 
-public class TcpConnection : IConnection
+public class TcpConnection : IConnection, IDisposable
 {
 	private TcpClient Client;
 	private NetworkStream Stream;
+	private bool _disposed = false;
 
 	public TcpConnection(string host, int port)
 	{
@@ -34,12 +35,16 @@ public class TcpConnection : IConnection
 
 	public void Send(string data)
 	{
+		if (_disposed) throw new ObjectDisposedException(nameof(TcpConnection));
+		
 		byte[] bytes = Encoding.UTF8.GetBytes(data + '\n');
 		Stream.Write(bytes, 0, bytes.Length);
 	}
 
 	public string? Read()
 	{
+		if (_disposed) throw new ObjectDisposedException(nameof(TcpConnection));
+		
 		if (!Stream.DataAvailable)
 			return null;
 
@@ -59,5 +64,14 @@ public class TcpConnection : IConnection
 			responseData = responseData.Substring(0, responseData.Length - 1);
 
 		return responseData;
+	}
+
+	public void Dispose()
+	{
+		if (_disposed) return;
+		
+		_disposed = true;
+		Stream?.Dispose();
+		Client?.Dispose();
 	}
 }
