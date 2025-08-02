@@ -4,6 +4,20 @@ Another .NET API client for [Snapcast](https://github.com/badaix/snapcast).  The
 
 **Note (2025/08/02): This is a fork of https://gitlab.com/sturd/snapcast-net implementing the missing functionality. I eventually create a PR for this, but this needs testing first. **
 
+## Installation
+
+### From GitHub Packages
+
+```bash
+# Add GitHub Packages source
+dotnet nuget add source https://nuget.pkg.github.com/metaneutrons/index.json --name github-snapcast-net
+
+# Install the package
+dotnet add package SnapCastNet --source github-snapcast-net
+```
+
+See [PACKAGE.md](PACKAGE.md) for detailed installation instructions and authentication setup.
+
 ## Usage
 
 ### Initialise
