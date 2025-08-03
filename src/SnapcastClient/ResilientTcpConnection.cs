@@ -221,9 +221,9 @@ public class ResilientTcpConnection : IConnection, IDisposable
     /// </summary>
     /// <param name="ex">The exception to check</param>
     /// <returns>True if this is an expected connection error, false otherwise</returns>
-    private static bool IsExpectedConnectionError(Exception ex)
+    private bool IsExpectedConnectionError(Exception ex)
     {
-        return ex switch
+        var result = ex switch
         {
             SocketException socketEx => socketEx.SocketErrorCode switch
             {
@@ -237,6 +237,20 @@ public class ResilientTcpConnection : IConnection, IDisposable
             TimeoutException => true,
             _ => false
         };
+
+        // Debug logging to understand what we're getting
+        if (ex is SocketException sockEx)
+        {
+            _logger?.LogInformation("SocketException with ErrorCode: {ErrorCode}, IsExpected: {IsExpected}", 
+                sockEx.SocketErrorCode, result);
+        }
+        else
+        {
+            _logger?.LogInformation("Exception type: {ExceptionType}, IsExpected: {IsExpected}", 
+                ex.GetType().Name, result);
+        }
+
+        return result;
     }
 
     private async Task ConnectAsync(bool isInitialConnection = false)
@@ -302,7 +316,7 @@ public class ResilientTcpConnection : IConnection, IDisposable
                     // Log connection failures more quietly for expected errors
                     if (IsExpectedConnectionError(ex))
                     {
-                        _logger?.LogDebug("Connection attempt {Attempt} failed: {Message}", _reconnectAttempts, ex.Message);
+                        _logger?.LogInformation("Connection attempt {Attempt} failed: {Message}", _reconnectAttempts, ex.Message);
                     }
                     else
                     {
