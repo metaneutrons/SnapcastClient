@@ -216,43 +216,6 @@ public class ResilientTcpConnection : IConnection, IDisposable
         return true;
     }
 
-    /// <summary>
-    /// Determines if an exception represents an expected connection error that should be logged quietly.
-    /// </summary>
-    /// <param name="ex">The exception to check</param>
-    /// <returns>True if this is an expected connection error, false otherwise</returns>
-    private bool IsExpectedConnectionError(Exception ex)
-    {
-        var result = ex switch
-        {
-            SocketException socketEx => socketEx.SocketErrorCode switch
-            {
-                SocketError.ConnectionRefused => true,
-                SocketError.HostUnreachable => true,
-                SocketError.NetworkUnreachable => true,
-                SocketError.TimedOut => true,
-                SocketError.HostDown => true,
-                _ => false
-            },
-            TimeoutException => true,
-            _ => false
-        };
-
-        // Debug logging to understand what we're getting
-        if (ex is SocketException sockEx)
-        {
-            _logger?.LogInformation("SocketException with ErrorCode: {ErrorCode}, IsExpected: {IsExpected}", 
-                sockEx.SocketErrorCode, result);
-        }
-        else
-        {
-            _logger?.LogInformation("Exception type: {ExceptionType}, IsExpected: {IsExpected}", 
-                ex.GetType().Name, result);
-        }
-
-        return result;
-    }
-
     private async Task ConnectAsync(bool isInitialConnection = false)
     {
         if (_disposed)
@@ -313,15 +276,9 @@ public class ResilientTcpConnection : IConnection, IDisposable
                 {
                     _reconnectAttempts++;
                     
-                    // Log connection failures more quietly for expected errors
-                    if (IsExpectedConnectionError(ex))
-                    {
-                        _logger?.LogInformation("Connection attempt {Attempt} failed: {Message}", _reconnectAttempts, ex.Message);
-                    }
-                    else
-                    {
-                        _logger?.LogWarning(ex, "Connection attempt {Attempt} failed: {Message}", _reconnectAttempts, ex.Message);
-                    }
+                    // Log connection failures as Information instead of Warning to reduce noise
+                    // Connection failures are expected when the server is unavailable
+                    _logger?.LogInformation("Connection attempt {Attempt} failed: {Message}", _reconnectAttempts, ex.Message);
 
                     OnReconnectAttempt?.Invoke(_reconnectAttempts, ex);
 
