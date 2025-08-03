@@ -276,19 +276,8 @@ public class ResilientTcpConnection : IConnection, IDisposable
                 {
                     _reconnectAttempts++;
                     
-                    // Include stack trace based on configuration, environment variable, or log level
-                    var verboseLogging = _options.VerboseConnectionLogging 
-                        || Environment.GetEnvironmentVariable("SNAPCAST_VERBOSE_LOGGING")?.ToLowerInvariant() == "true"
-                        || _logger?.IsEnabled(LogLevel.Debug) == true;
-                    
-                    if (verboseLogging)
-                    {
-                        _logger?.LogInformation(ex, "Connection attempt {Attempt} failed: {Message}", _reconnectAttempts, ex.Message);
-                    }
-                    else
-                    {
-                        _logger?.LogInformation("Connection attempt {Attempt} failed: {Message}", _reconnectAttempts, ex.Message);
-                    }
+                    // Log connection failures at Debug level - they're expected when server is unavailable
+                    _logger?.LogDebug(ex, "Connection attempt {Attempt} failed: {Message}", _reconnectAttempts, ex.Message);
 
                     OnReconnectAttempt?.Invoke(_reconnectAttempts, ex);
 
@@ -338,7 +327,8 @@ public class ResilientTcpConnection : IConnection, IDisposable
 
     private void HandleConnectionError(Exception ex)
     {
-        _logger?.LogWarning(ex, "Connection error detected: {Message}", ex.Message);
+        // Connection errors are expected when server is unavailable - log at Debug level
+        _logger?.LogDebug(ex, "Connection error detected: {Message}", ex.Message);
 
         if (_connectionState == ConnectionState.Connected)
         {
@@ -385,7 +375,7 @@ public class ResilientTcpConnection : IConnection, IDisposable
         }
         catch (Exception ex)
         {
-            _logger?.LogWarning(ex, "Health check failed: {Message}", ex.Message);
+            _logger?.LogDebug(ex, "Health check failed: {Message}", ex.Message);
             HandleConnectionError(ex);
         }
     }
