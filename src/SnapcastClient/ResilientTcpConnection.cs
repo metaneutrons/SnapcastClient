@@ -276,9 +276,19 @@ public class ResilientTcpConnection : IConnection, IDisposable
                 {
                     _reconnectAttempts++;
                     
-                    // Log connection failures as Information instead of Warning to reduce noise
-                    // Connection failures are expected when the server is unavailable
-                    _logger?.LogInformation("Connection attempt {Attempt} failed: {Message}", _reconnectAttempts, ex.Message);
+                    // Include stack trace based on configuration, environment variable, or log level
+                    var verboseLogging = _options.VerboseConnectionLogging 
+                        || Environment.GetEnvironmentVariable("SNAPCAST_VERBOSE_LOGGING")?.ToLowerInvariant() == "true"
+                        || _logger?.IsEnabled(LogLevel.Debug) == true;
+                    
+                    if (verboseLogging)
+                    {
+                        _logger?.LogInformation(ex, "Connection attempt {Attempt} failed: {Message}", _reconnectAttempts, ex.Message);
+                    }
+                    else
+                    {
+                        _logger?.LogInformation("Connection attempt {Attempt} failed: {Message}", _reconnectAttempts, ex.Message);
+                    }
 
                     OnReconnectAttempt?.Invoke(_reconnectAttempts, ex);
 

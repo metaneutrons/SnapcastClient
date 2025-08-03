@@ -39,6 +39,13 @@ public class SnapcastClientOptions
     public int HealthCheckIntervalMs { get; set; } = 30000;
 
     /// <summary>
+    /// Whether to include stack traces in connection error logs.
+    /// When false, only the error message is logged. When true, full stack traces are included.
+    /// Default: false (clean logging)
+    /// </summary>
+    public bool VerboseConnectionLogging { get; set; } = false;
+
+    /// <summary>
     /// Enable automatic reconnection on connection loss. Default: true
     /// </summary>
     public bool EnableAutoReconnect { get; set; } = true;
