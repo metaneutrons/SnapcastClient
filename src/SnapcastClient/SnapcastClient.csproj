@@ -21,4 +21,25 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
     <PackageReference Include="Newtonsoft.Json" />
   </ItemGroup>
+
+  <!-- Automatically copy packages to local NuGet directory -->
+  <Target Name="CopyToLocalNuGet" AfterTargets="Pack" Condition="'$(Configuration)' == 'Release'">
+    <PropertyGroup>
+      <HomeDirectory Condition="'$(OS)' == 'Windows_NT'">$(USERPROFILE)</HomeDirectory>
+      <HomeDirectory Condition="'$(OS)' != 'Windows_NT'">$(HOME)</HomeDirectory>
+      <LocalNuGetPath>$(HomeDirectory)/.nuget/local</LocalNuGetPath>
+      <PackageFileName>$(PackageId).$(PackageVersion).nupkg</PackageFileName>
+      <SourcePackagePath>$(OutputPath)../$(PackageFileName)</SourcePackagePath>
+    </PropertyGroup>
+    
+    <MakeDir Directories="$(LocalNuGetPath)" Condition="!Exists('$(LocalNuGetPath)')" />
+    
+    <Copy SourceFiles="$(SourcePackagePath)" 
+          DestinationFolder="$(LocalNuGetPath)" 
+          Condition="Exists('$(SourcePackagePath)')" />
+    
+    <Message Text="Copied package to local NuGet: $(LocalNuGetPath)/$(PackageFileName)" 
+             Importance="high" 
+             Condition="Exists('$(SourcePackagePath)')" />
+  </Target>
 </Project>
