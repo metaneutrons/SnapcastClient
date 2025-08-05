@@ -102,37 +102,6 @@ public class ServiceCollectionExtensionsTests
     }
 
     [Test]
-    public void AddSnapcastClientSimple_WithValidParameters_RegistersServices()
-    {
-        // Arrange & Act
-        _services.AddSnapcastClientSimple("localhost", 1705);
-        var serviceProvider = _services.BuildServiceProvider();
-
-        // Assert - Just verify the services are registered, don't try to create actual connections
-        var connectionFactory = serviceProvider.GetService<Func<IConnection>>();
-        Assert.That(connectionFactory, Is.Not.Null);
-        
-        // We can't test the actual client creation here because it would try to connect to localhost:1705
-        // Instead, we verify that the registration works by checking the factory exists
-    }
-
-    [Test]
-    public void AddSnapcastClientSimple_WithNullHost_ThrowsArgumentException()
-    {
-        // Arrange, Act & Assert
-        Assert.Throws<ArgumentException>(() => 
-            _services.AddSnapcastClientSimple(null!, 1705));
-    }
-
-    [Test]
-    public void AddSnapcastClientSimple_WithInvalidPort_ThrowsArgumentOutOfRangeException()
-    {
-        // Arrange, Act & Assert
-        Assert.Throws<ArgumentOutOfRangeException>(() => 
-            _services.AddSnapcastClientSimple("localhost", 0));
-    }
-
-    [Test]
     public void AddSnapcastClient_WithCustomFactory_RegistersServices()
     {
         // Arrange

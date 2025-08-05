@@ -28,12 +28,12 @@ namespace SnapcastClient;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Adds Snapcast client services to the service collection
+    /// Adds Snapcast client services to the service collection with basic TCP connection
     /// </summary>
     /// <param name="services">The service collection</param>
     /// <param name="host">Snapcast server host</param>
     /// <param name="port">Snapcast server port</param>
-    /// <param name="configure">Optional configuration action</param>
+    /// <param name="configure">Optional configuration action (for future use)</param>
     /// <returns>The service collection for chaining</returns>
     public static IServiceCollection AddSnapcastClient(
         this IServiceCollection services,
@@ -48,7 +48,7 @@ public static class ServiceCollectionExtensions
         if (port <= 0 || port > 65535)
             throw new ArgumentOutOfRangeException(nameof(port), "Port must be between 1 and 65535");
 
-        // Configure options
+        // Configure options (for future use)
         if (configure != null)
         {
             services.Configure(configure);
@@ -58,45 +58,7 @@ public static class ServiceCollectionExtensions
             services.Configure<SnapcastClientOptions>(_ => { });
         }
 
-        // Register connection factory
-        services.AddSingleton<Func<IConnection>>(serviceProvider =>
-        {
-            return () =>
-            {
-                var options = serviceProvider.GetRequiredService<IOptions<SnapcastClientOptions>>().Value;
-                var logger = serviceProvider.GetService<ILogger<ResilientTcpConnection>>();
-                var timeProvider = serviceProvider.GetService<TimeProvider>() ?? TimeProvider.System;
-                return new ResilientTcpConnection(host, port, options, logger, timeProvider);
-            };
-        });
-
-        // Register client
-        services.AddSingleton<IClient>(serviceProvider =>
-        {
-            var connectionFactory = serviceProvider.GetRequiredService<Func<IConnection>>();
-            var logger = serviceProvider.GetService<ILogger<Client>>();
-            return new Client(connectionFactory(), logger);
-        });
-
-        return services;
-    }
-
-    /// <summary>
-    /// Adds Snapcast client services with a simple TCP connection (no resilience features)
-    /// </summary>
-    /// <param name="services">The service collection</param>
-    /// <param name="host">Snapcast server host</param>
-    /// <param name="port">Snapcast server port</param>
-    /// <returns>The service collection for chaining</returns>
-    public static IServiceCollection AddSnapcastClientSimple(this IServiceCollection services, string host, int port)
-    {
-        if (string.IsNullOrWhiteSpace(host))
-            throw new ArgumentException("Host cannot be null, empty, or whitespace", nameof(host));
-
-        if (port <= 0 || port > 65535)
-            throw new ArgumentOutOfRangeException(nameof(port), "Port must be between 1 and 65535");
-
-        // Register simple connection factory
+        // Register basic TCP connection factory
         services.AddSingleton<Func<IConnection>>(serviceProvider => () => new TcpConnection(host, port));
 
         // Register client
