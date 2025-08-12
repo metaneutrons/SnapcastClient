@@ -77,19 +77,82 @@ public class TcpConnection : IConnection, IDisposable
         string responseData = "";
         int chunkSize = 1024;
         byte[] responseBytes = new byte[chunkSize];
+        int braceCount = 0;
+        bool inString = false;
+        bool escapeNext = false;
+        bool jsonStarted = false;
 
         int bytesRead;
         while ((bytesRead = Stream.Read(responseBytes, 0, responseBytes.Length)) > 0)
         {
-            responseData += Encoding.UTF8.GetString(responseBytes, 0, bytesRead);
+            string chunk = Encoding.UTF8.GetString(responseBytes, 0, bytesRead);
+            responseData += chunk;
 
-            if (responseData.Contains('\n'))
-                break;
+            // Parse character by character to find complete JSON object
+            for (int i = responseData.Length - chunk.Length; i < responseData.Length; i++)
+            {
+                char c = responseData[i];
+
+                if (escapeNext)
+                {
+                    escapeNext = false;
+                    continue;
+                }
+
+                if (c == '\\' && inString)
+                {
+                    escapeNext = true;
+                    continue;
+                }
+
+                if (c == '"')
+                {
+                    inString = !inString;
+                    continue;
+                }
+
+                if (!inString)
+                {
+                    if (c == '{')
+                    {
+                        braceCount++;
+                        jsonStarted = true;
+                    }
+                    else if (c == '}')
+                    {
+                        braceCount--;
+                        
+                        // Complete JSON object found
+                        if (jsonStarted && braceCount == 0)
+                        {
+                            // Look for the terminating newline
+                            if (i + 1 < responseData.Length && responseData[i + 1] == '\n')
+                            {
+                                return responseData.Substring(0, i + 1);
+                            }
+                            // If we're at the end, check if next read gives us the newline
+                            if (i + 1 == responseData.Length)
+                            {
+                                // Continue reading to get the newline
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // If we have a complete JSON object followed by newline, return it
+            if (jsonStarted && braceCount == 0 && responseData.EndsWith('\n'))
+            {
+                return responseData.Substring(0, responseData.Length - 1);
+            }
         }
+
+        // If we exit the loop, return what we have (fallback for malformed JSON)
         if (responseData.EndsWith('\n'))
             responseData = responseData.Substring(0, responseData.Length - 1);
 
-        return responseData;
+        return responseData.Length > 0 ? responseData : null;
     }
 
     /// <summary>

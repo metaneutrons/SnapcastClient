@@ -230,6 +230,18 @@ public class Client : IClient, IDisposable
             _logger?.LogError(e, "Error parsing JSON response: {Response}", response);
             return;
         }
+        catch (JsonSerializationException e)
+        {
+            _logger?.LogError(e, "JSON serialization error. Response length: {Length}, Response: {Response}", 
+                response.Length, response.Length > 500 ? response.Substring(0, 500) + "..." : response);
+            return;
+        }
+        catch (ArgumentException e)
+        {
+            _logger?.LogError(e, "Argument error during JSON deserialization. Response: {Response}", 
+                response.Length > 200 ? response.Substring(0, 200) + "..." : response);
+            return;
+        }
 
         if (peek.Id != null)
         {
