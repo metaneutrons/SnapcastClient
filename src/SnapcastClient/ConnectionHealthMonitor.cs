@@ -112,7 +112,6 @@ public class ConnectionHealthMonitor : IDisposable
                 HealthyChecks = 0,
                 UnhealthyChecks = 0,
                 TotalDowntime = TimeSpan.MaxValue,
-                UptimePercentage = 0.0,
                 IsDisposed = true
             };
         }
@@ -120,8 +119,6 @@ public class ConnectionHealthMonitor : IDisposable
         lock (_lock)
         {
             var timeSinceLastMessage = DateTime.UtcNow - _lastMessageReceived;
-            var totalChecks = _healthyChecks + _unhealthyChecks;
-            var uptimePercentage = totalChecks > 0 ? (_healthyChecks / (double)totalChecks) * 100.0 : 100.0;
             
             // Calculate current downtime if unhealthy
             var currentDowntime = _totalDowntime;
@@ -139,7 +136,6 @@ public class ConnectionHealthMonitor : IDisposable
                 HealthyChecks = _healthyChecks,
                 UnhealthyChecks = _unhealthyChecks,
                 TotalDowntime = currentDowntime,
-                UptimePercentage = uptimePercentage,
                 IsDisposed = false
             };
         }
@@ -331,10 +327,7 @@ public class ConnectionHealthStats
     /// </summary>
     public TimeSpan TotalDowntime { get; set; }
 
-    /// <summary>
-    /// Percentage of time the connection has been healthy.
-    /// </summary>
-    public double UptimePercentage { get; set; }
+
 
     /// <summary>
     /// Whether the health monitor has been disposed.
@@ -356,7 +349,7 @@ public class ConnectionHealthStats
 
         return $"Health: {(IsHealthy ? "Healthy" : "Unhealthy")}, " +
                $"Messages: {TotalMessages}, " +
-               $"Uptime: {UptimePercentage:F1}%, " +
+               $"Checks: {TotalChecks} ({HealthyChecks} healthy, {UnhealthyChecks} unhealthy), " +
                $"Last Message: {TimeSinceLastMessage.TotalSeconds:F1}s ago, " +
                $"Total Downtime: {TotalDowntime.TotalSeconds:F1}s";
     }
