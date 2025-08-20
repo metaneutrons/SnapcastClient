@@ -41,6 +41,7 @@ public class Client : IClient, IDisposable
 
     private readonly Mutex CommandMutex = new Mutex();
     private readonly Thread ResponseReader;
+    private readonly CancellationTokenSource _listenerCancellation = new();
     private bool Listening = true;
     private readonly Dictionary<uint, IResponseHandler> ResponseHandlers = new Dictionary<uint, IResponseHandler>();
     private bool _disposed = false;
@@ -144,10 +145,14 @@ public class Client : IClient, IDisposable
 
         _logger?.LogInformation("Initializing Snapcast client");
 
+        // Start both legacy thread-based and new async-based response listeners
         ResponseReader = new Thread(ListenForResponses) { Name = "SnapCastResponseReader" };
         ResponseReader.Start();
 
-        _logger?.LogDebug("Response reader thread started");
+        // Start the new enterprise-grade async response listener
+        _ = Task.Run(async () => await ListenForResponsesAsync(_listenerCancellation.Token));
+
+        _logger?.LogDebug("Response reader thread and async listener started");
     }
 
     /// <summary>
@@ -164,7 +169,20 @@ public class Client : IClient, IDisposable
         _logger?.LogInformation("Disposing Snapcast client");
 
         Listening = false;
+        _listenerCancellation.Cancel();
+        
+        // Wait for both legacy thread and async processing to complete
         ResponseReader?.Join(TimeSpan.FromSeconds(5)); // Wait up to 5 seconds for thread to finish
+        
+        // Stop the async message processing pipeline
+        try
+        {
+            Connection.StopMessageProcessingAsync().Wait(TimeSpan.FromSeconds(5));
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogWarning(ex, "Error stopping async message processing during disposal");
+        }
 
         if (Connection is IDisposable disposableConnection)
         {
@@ -172,6 +190,7 @@ public class Client : IClient, IDisposable
         }
 
         CommandMutex?.Dispose();
+        _listenerCancellation?.Dispose();
         _disposed = true;
 
         _logger?.LogDebug("Snapcast client disposed");
@@ -352,6 +371,92 @@ public class Client : IClient, IDisposable
         {
             var notification = JsonConvert.DeserializeObject<RpcNotification<Params.ServerOnUpdate>>(response);
             OnServerUpdate?.Invoke(notification.Params.Server);
+        }
+    }
+
+    /// <summary>
+    /// Enterprise-grade async response listener using producer-consumer pattern (Phase 2).
+    /// This method integrates with the TcpConnection's message processing pipeline.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token to stop listening.</param>
+    /// <returns>Task representing the async listening operation.</returns>
+    private async Task ListenForResponsesAsync(CancellationToken cancellationToken)
+    {
+        _logger?.LogDebug("Starting enterprise-grade async response listener");
+
+        try
+        {
+            // Subscribe to the connection's message events
+            Connection.MessageReceived += OnMessageReceived;
+            Connection.ProcessingError += OnProcessingError;
+            Connection.ConnectionHealthChanged += OnConnectionHealthChanged;
+
+            // Start the producer-consumer message processing pipeline
+            await Connection.StartMessageProcessingAsync(cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            _logger?.LogDebug("Async response listener cancelled");
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError(ex, "Error in async response listener");
+        }
+        finally
+        {
+            // Unsubscribe from events
+            Connection.MessageReceived -= OnMessageReceived;
+            Connection.ProcessingError -= OnProcessingError;
+            Connection.ConnectionHealthChanged -= OnConnectionHealthChanged;
+            
+            _logger?.LogDebug("Async response listener stopped");
+        }
+    }
+
+    /// <summary>
+    /// Handles messages received from the producer-consumer pipeline.
+    /// </summary>
+    /// <param name="message">The received message.</param>
+    private void OnMessageReceived(string message)
+    {
+        try
+        {
+            if (_logger?.IsEnabled(LogLevel.Trace) == true)
+            {
+                _logger.LogTrace("Async listener received message: {Message}", message);
+            }
+
+            // Process the message using the existing HandleResponse logic
+            message.Split('\n').ToList().ForEach(HandleResponse);
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError(ex, "Error handling async message: {Message}", message);
+        }
+    }
+
+    /// <summary>
+    /// Handles processing errors from the producer-consumer pipeline.
+    /// </summary>
+    /// <param name="error">The processing error.</param>
+    private void OnProcessingError(Exception error)
+    {
+        _logger?.LogError(error, "Processing error in message pipeline");
+    }
+
+    /// <summary>
+    /// Handles connection health changes from the producer-consumer pipeline.
+    /// </summary>
+    /// <param name="isHealthy">True if the connection is healthy, false otherwise.</param>
+    private void OnConnectionHealthChanged(bool isHealthy)
+    {
+        if (isHealthy)
+        {
+            _logger?.LogInformation("Connection health restored");
+        }
+        else
+        {
+            _logger?.LogWarning("Connection health degraded");
         }
     }
 
