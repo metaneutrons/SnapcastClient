@@ -73,7 +73,7 @@ public class CircuitBreakerTests
         var options = new CircuitBreakerOptions
         {
             FailureThreshold = 3,
-            Timeout = TimeSpan.FromSeconds(1)
+            Timeout = TimeSpan.FromSeconds(1),
         };
         var circuitBreaker = new CircuitBreaker(options, _mockLogger.Object);
 
@@ -105,7 +105,7 @@ public class CircuitBreakerTests
         var options = new CircuitBreakerOptions
         {
             FailureThreshold = 2,
-            Timeout = TimeSpan.FromSeconds(1)
+            Timeout = TimeSpan.FromSeconds(1),
         };
         var circuitBreaker = new CircuitBreaker(options, _mockLogger.Object);
 
@@ -145,7 +145,7 @@ public class CircuitBreakerTests
         var options = new CircuitBreakerOptions
         {
             FailureThreshold = 2,
-            Timeout = TimeSpan.FromMilliseconds(100) // Short timeout for testing
+            Timeout = TimeSpan.FromMilliseconds(100), // Short timeout for testing
         };
         var circuitBreaker = new CircuitBreaker(options, _mockLogger.Object);
 
@@ -197,11 +197,13 @@ public class CircuitBreakerTests
         // Cause failure to open circuit
         try
         {
-            circuitBreaker.ExecuteAsync<int>(async () =>
-            {
-                await Task.CompletedTask;
-                throw new InvalidOperationException("Test failure");
-            }).Wait();
+            circuitBreaker
+                .ExecuteAsync<int>(async () =>
+                {
+                    await Task.CompletedTask;
+                    throw new InvalidOperationException("Test failure");
+                })
+                .Wait();
         }
         catch
         {
@@ -278,11 +280,7 @@ public class CircuitBreakerTests
     public void ConnectionHealthStats_ShouldCalculateTotalChecksCorrectly()
     {
         // Arrange
-        var stats = new ConnectionHealthStats
-        {
-            HealthyChecks = 8,
-            UnhealthyChecks = 2
-        };
+        var stats = new ConnectionHealthStats { HealthyChecks = 8, UnhealthyChecks = 2 };
 
         // Act & Assert
         Assert.That(stats.TotalChecks, Is.EqualTo(10));
@@ -297,7 +295,7 @@ public class CircuitBreakerTests
             ProcessingStats = new MessageProcessingStats { IsHealthy = true },
             CircuitBreakerStats = new CircuitBreakerStats { State = CircuitBreakerState.Closed },
             HealthStats = new ConnectionHealthStats { IsHealthy = true },
-            OverallHealth = true
+            OverallHealth = true,
         };
 
         // Act
@@ -329,10 +327,10 @@ public class CircuitBreakerTests
         // Arrange
         var options = new CircuitBreakerOptions { FailureThreshold = 1 };
         var circuitBreaker = new CircuitBreaker(options, _mockLogger.Object);
-        
+
         CircuitBreakerState? oldState = null;
         CircuitBreakerState? newState = null;
-        
+
         circuitBreaker.StateChanged += (old, @new) =>
         {
             oldState = old;
@@ -374,7 +372,7 @@ public class CircuitBreakerTests
     {
         // Arrange
         var innerException = new InvalidOperationException("Inner");
-        
+
         // Act
         var exception = new CircuitBreakerOpenException("Test message", innerException);
 

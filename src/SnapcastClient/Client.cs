@@ -43,7 +43,8 @@ public class Client : IClient, IDisposable
     private readonly Thread ResponseReader;
     private readonly CancellationTokenSource _listenerCancellation = new();
     private bool Listening = true;
-    private readonly Dictionary<uint, IResponseHandler> ResponseHandlers = new Dictionary<uint, IResponseHandler>();
+    private readonly Dictionary<uint, IResponseHandler> ResponseHandlers =
+        new Dictionary<uint, IResponseHandler>();
     private bool _disposed = false;
 
     /// <summary>
@@ -53,6 +54,7 @@ public class Client : IClient, IDisposable
     /// Event fired when a client connects to the server.
     /// </summary>
     public Action<SnapClient>? OnClientConnect { set; get; }
+
     /// <summary>
     /// Event fired when a client disconnects from the server.
     /// </summary>
@@ -170,10 +172,10 @@ public class Client : IClient, IDisposable
 
         Listening = false;
         _listenerCancellation.Cancel();
-        
+
         // Wait for both legacy thread and async processing to complete
         ResponseReader?.Join(TimeSpan.FromSeconds(5)); // Wait up to 5 seconds for thread to finish
-        
+
         // Stop the async message processing pipeline
         try
         {
@@ -225,7 +227,7 @@ public class Client : IClient, IDisposable
                 {
                     _logger?.LogError(ex, "Error in response listener thread");
                 }
-                
+
                 // Add a small delay after exceptions to prevent tight error loops
                 Thread.Sleep(100);
             }
@@ -251,14 +253,21 @@ public class Client : IClient, IDisposable
         }
         catch (JsonSerializationException e)
         {
-            _logger?.LogError(e, "JSON serialization error. Response length: {Length}, Response: {Response}", 
-                response.Length, response.Length > 500 ? response.Substring(0, 500) + "..." : response);
+            _logger?.LogError(
+                e,
+                "JSON serialization error. Response length: {Length}, Response: {Response}",
+                response.Length,
+                response.Length > 500 ? response.Substring(0, 500) + "..." : response
+            );
             return;
         }
         catch (ArgumentException e)
         {
-            _logger?.LogError(e, "Argument error during JSON deserialization. Response: {Response}", 
-                response.Length > 200 ? response.Substring(0, 200) + "..." : response);
+            _logger?.LogError(
+                e,
+                "Argument error during JSON deserialization. Response: {Response}",
+                response.Length > 200 ? response.Substring(0, 200) + "..." : response
+            );
             return;
         }
 
@@ -290,11 +299,18 @@ public class Client : IClient, IDisposable
                 if (peek.Error == null)
                 {
                     responseHandler.HandleResponse(response);
-                    _logger?.LogDebug("Successfully handled response for command ID: {CommandId}", id);
+                    _logger?.LogDebug(
+                        "Successfully handled response for command ID: {CommandId}",
+                        id
+                    );
                 }
                 else
                 {
-                    _logger?.LogWarning("Command ID {CommandId} returned error: {Error}", id, peek.Error.Value);
+                    _logger?.LogWarning(
+                        "Command ID {CommandId} returned error: {Error}",
+                        id,
+                        peek.Error.Value
+                    );
                     responseHandler.HandleError(peek.Error.Value);
                 }
             }
@@ -319,57 +335,79 @@ public class Client : IClient, IDisposable
     {
         if (method == "Client.OnConnect")
         {
-            var notification = JsonConvert.DeserializeObject<RpcNotification<ClientStatus>>(response);
+            var notification = JsonConvert.DeserializeObject<RpcNotification<ClientStatus>>(
+                response
+            );
             OnClientConnect?.Invoke(notification.Params.Client);
         }
         else if (method == "Client.OnDisconnect")
         {
-            var notification = JsonConvert.DeserializeObject<RpcNotification<ClientStatus>>(response);
+            var notification = JsonConvert.DeserializeObject<RpcNotification<ClientStatus>>(
+                response
+            );
             OnClientDisconnect?.Invoke(notification.Params.Client);
         }
         else if (method == "Client.OnVolumeChanged")
         {
-            var notification = JsonConvert.DeserializeObject<RpcNotification<Params.ClientSetVolume>>(response);
+            var notification = JsonConvert.DeserializeObject<
+                RpcNotification<Params.ClientSetVolume>
+            >(response);
             OnClientVolumeChanged?.Invoke(notification.Params);
         }
         else if (method == "Client.OnLatencyChanged")
         {
-            var notification = JsonConvert.DeserializeObject<RpcNotification<Params.ClientSetLatency>>(response);
+            var notification = JsonConvert.DeserializeObject<
+                RpcNotification<Params.ClientSetLatency>
+            >(response);
             OnClientLatencyChanged?.Invoke(notification.Params);
         }
         else if (method == "Client.OnNameChanged")
         {
-            var notification = JsonConvert.DeserializeObject<RpcNotification<Params.ClientSetName>>(response);
+            var notification = JsonConvert.DeserializeObject<RpcNotification<Params.ClientSetName>>(
+                response
+            );
             OnClientNameChanged?.Invoke(notification.Params);
         }
         else if (method == "Group.OnMute")
         {
-            var notification = JsonConvert.DeserializeObject<RpcNotification<Params.GroupOnMute>>(response);
+            var notification = JsonConvert.DeserializeObject<RpcNotification<Params.GroupOnMute>>(
+                response
+            );
             OnGroupMute?.Invoke(notification.Params);
         }
         else if (method == "Group.OnStreamChanged")
         {
-            var notification = JsonConvert.DeserializeObject<RpcNotification<Params.GroupOnStreamChanged>>(response);
+            var notification = JsonConvert.DeserializeObject<
+                RpcNotification<Params.GroupOnStreamChanged>
+            >(response);
             OnGroupStreamChanged?.Invoke(notification.Params);
         }
         else if (method == "Group.OnNameChanged")
         {
-            var notification = JsonConvert.DeserializeObject<RpcNotification<Params.GroupOnNameChanged>>(response);
+            var notification = JsonConvert.DeserializeObject<
+                RpcNotification<Params.GroupOnNameChanged>
+            >(response);
             OnGroupNameChanged?.Invoke(notification.Params);
         }
         else if (method == "Stream.OnProperties")
         {
-            var notification = JsonConvert.DeserializeObject<RpcNotification<Params.StreamOnProperties>>(response);
+            var notification = JsonConvert.DeserializeObject<
+                RpcNotification<Params.StreamOnProperties>
+            >(response);
             OnStreamProperties?.Invoke(notification.Params);
         }
         else if (method == "Stream.OnUpdate")
         {
-            var notification = JsonConvert.DeserializeObject<RpcNotification<Params.StreamOnUpdate>>(response);
+            var notification = JsonConvert.DeserializeObject<
+                RpcNotification<Params.StreamOnUpdate>
+            >(response);
             OnStreamUpdate?.Invoke(notification.Params.Stream);
         }
         else if (method == "Server.OnUpdate")
         {
-            var notification = JsonConvert.DeserializeObject<RpcNotification<Params.ServerOnUpdate>>(response);
+            var notification = JsonConvert.DeserializeObject<
+                RpcNotification<Params.ServerOnUpdate>
+            >(response);
             OnServerUpdate?.Invoke(notification.Params.Server);
         }
     }
@@ -408,7 +446,7 @@ public class Client : IClient, IDisposable
             Connection.MessageReceived -= OnMessageReceived;
             Connection.ProcessingError -= OnProcessingError;
             Connection.ConnectionHealthChanged -= OnConnectionHealthChanged;
-            
+
             _logger?.LogDebug("Async response listener stopped");
         }
     }
@@ -465,7 +503,11 @@ public class Client : IClient, IDisposable
         if (_disposed)
             throw new ObjectDisposedException(nameof(Client));
 
-        _logger?.LogDebug("Executing command: {CommandType} with ID: {CommandId}", command.GetType().Name, command.Id);
+        _logger?.LogDebug(
+            "Executing command: {CommandType} with ID: {CommandId}",
+            command.GetType().Name,
+            command.Id
+        );
 
         CommandMutex.WaitOne();
         try
@@ -506,7 +548,10 @@ public class Client : IClient, IDisposable
     public async Task<Models.SnapClient> ClientGetStatusAsync(string id)
     {
         if (string.IsNullOrWhiteSpace(id))
-            throw new ArgumentException("Client ID cannot be null, empty, or whitespace", nameof(id));
+            throw new ArgumentException(
+                "Client ID cannot be null, empty, or whitespace",
+                nameof(id)
+            );
 
         _logger?.LogInformation("Getting status for client: {ClientId}", id);
 
@@ -516,14 +561,20 @@ public class Client : IClient, IDisposable
         );
         if (command == null)
         {
-            _logger?.LogError("Failed to create Client.GetStatus command for client: {ClientId}", id);
+            _logger?.LogError(
+                "Failed to create Client.GetStatus command for client: {ClientId}",
+                id
+            );
             throw new Exception("Failed to create Client.GetStatus command");
         }
 
         var tcs = new TaskCompletionSource<ClientStatus>();
         Execute(
             command,
-            new ResponseHandler<ClientStatus>(tcs.SetResult, e => tcs.SetException(new CommandException(e)))
+            new ResponseHandler<ClientStatus>(
+                tcs.SetResult,
+                e => tcs.SetException(new CommandException(e))
+            )
         );
 
         try
@@ -559,7 +610,13 @@ public class Client : IClient, IDisposable
             throw new Exception("Failed to create Client.SetVolume command");
 
         var tcs = new TaskCompletionSource<VolumeSet>();
-        Execute(command, new ResponseHandler<VolumeSet>(tcs.SetResult, e => tcs.SetException(new CommandException(e))));
+        Execute(
+            command,
+            new ResponseHandler<VolumeSet>(
+                tcs.SetResult,
+                e => tcs.SetException(new CommandException(e))
+            )
+        );
         await tcs.Task;
     }
 
@@ -581,7 +638,10 @@ public class Client : IClient, IDisposable
         var tcs = new TaskCompletionSource<LatencySet>();
         Execute(
             command,
-            new ResponseHandler<LatencySet>(tcs.SetResult, e => tcs.SetException(new CommandException(e)))
+            new ResponseHandler<LatencySet>(
+                tcs.SetResult,
+                e => tcs.SetException(new CommandException(e))
+            )
         );
         await tcs.Task;
     }
@@ -602,7 +662,13 @@ public class Client : IClient, IDisposable
             throw new Exception("Failed to create Client.SetName command");
 
         var tcs = new TaskCompletionSource<NameSet>();
-        Execute(command, new ResponseHandler<NameSet>(tcs.SetResult, e => tcs.SetException(new CommandException(e))));
+        Execute(
+            command,
+            new ResponseHandler<NameSet>(
+                tcs.SetResult,
+                e => tcs.SetException(new CommandException(e))
+            )
+        );
         await tcs.Task;
     }
 
@@ -613,14 +679,20 @@ public class Client : IClient, IDisposable
     /// <returns>The requested group.</returns>
     public async Task<Models.Group> GroupGetStatusAsync(string id)
     {
-        var command = CommandFactory.createCommand(CommandType.GROUP_GET_STATUS, new Params.GroupGetStatus { Id = id });
+        var command = CommandFactory.createCommand(
+            CommandType.GROUP_GET_STATUS,
+            new Params.GroupGetStatus { Id = id }
+        );
         if (command == null)
             throw new Exception("Failed to create Group.GetStatus command");
 
         var tcs = new TaskCompletionSource<GroupStatus>();
         Execute(
             command,
-            new ResponseHandler<GroupStatus>(tcs.SetResult, e => tcs.SetException(new CommandException(e)))
+            new ResponseHandler<GroupStatus>(
+                tcs.SetResult,
+                e => tcs.SetException(new CommandException(e))
+            )
         );
 
         var response = await tcs.Task;
@@ -645,7 +717,10 @@ public class Client : IClient, IDisposable
         var tcs = new TaskCompletionSource<GroupMuteSet>();
         Execute(
             command,
-            new ResponseHandler<GroupMuteSet>(tcs.SetResult, e => tcs.SetException(new CommandException(e)))
+            new ResponseHandler<GroupMuteSet>(
+                tcs.SetResult,
+                e => tcs.SetException(new CommandException(e))
+            )
         );
         await tcs.Task;
     }
@@ -668,7 +743,10 @@ public class Client : IClient, IDisposable
         var tcs = new TaskCompletionSource<GroupStreamSet>();
         Execute(
             command,
-            new ResponseHandler<GroupStreamSet>(tcs.SetResult, e => tcs.SetException(new CommandException(e)))
+            new ResponseHandler<GroupStreamSet>(
+                tcs.SetResult,
+                e => tcs.SetException(new CommandException(e))
+            )
         );
         await tcs.Task;
     }
@@ -691,7 +769,10 @@ public class Client : IClient, IDisposable
         var tcs = new TaskCompletionSource<GroupClientsSet>();
         Execute(
             command,
-            new ResponseHandler<GroupClientsSet>(tcs.SetResult, e => tcs.SetException(new CommandException(e)))
+            new ResponseHandler<GroupClientsSet>(
+                tcs.SetResult,
+                e => tcs.SetException(new CommandException(e))
+            )
         );
         await tcs.Task;
     }
@@ -714,7 +795,10 @@ public class Client : IClient, IDisposable
         var tcs = new TaskCompletionSource<GroupNameSet>();
         Execute(
             command,
-            new ResponseHandler<GroupNameSet>(tcs.SetResult, e => tcs.SetException(new CommandException(e)))
+            new ResponseHandler<GroupNameSet>(
+                tcs.SetResult,
+                e => tcs.SetException(new CommandException(e))
+            )
         );
         await tcs.Task;
     }
@@ -725,14 +809,20 @@ public class Client : IClient, IDisposable
     /// <returns>The RPC version of the server.</returns>
     public async Task<Models.RpcVersion> ServerGetRpcVersionAsync()
     {
-        var command = CommandFactory.createCommand(CommandType.SERVER_GET_RPC_VERSION, new NullParams());
+        var command = CommandFactory.createCommand(
+            CommandType.SERVER_GET_RPC_VERSION,
+            new NullParams()
+        );
         if (command == null)
             throw new Exception("Failed to create Server.GetRpcVersion command");
 
         var tcs = new TaskCompletionSource<RpcVersion>();
         Execute(
             command,
-            new ResponseHandler<RpcVersion>(tcs.SetResult, e => tcs.SetException(new CommandException(e)))
+            new ResponseHandler<RpcVersion>(
+                tcs.SetResult,
+                e => tcs.SetException(new CommandException(e))
+            )
         );
         return await tcs.Task;
     }
@@ -822,7 +912,11 @@ public class Client : IClient, IDisposable
     /// <param name="command">The control command to execute.</param>
     /// <param name="parameters">Optional parameters for the command.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public async Task StreamControlAsync(string id, string command, Dictionary<string, object>? parameters = null)
+    public async Task StreamControlAsync(
+        string id,
+        string command,
+        Dictionary<string, object>? parameters = null
+    )
     {
         var commandObj = CommandFactory.createCommand(
             CommandType.STREAM_CONTROL,
@@ -837,7 +931,13 @@ public class Client : IClient, IDisposable
             throw new Exception("Failed to create Stream.Control command");
 
         var tcs = new TaskCompletionSource<string>();
-        Execute(commandObj, new ResponseHandler<string>(tcs.SetResult, e => tcs.SetException(new CommandException(e))));
+        Execute(
+            commandObj,
+            new ResponseHandler<string>(
+                tcs.SetResult,
+                e => tcs.SetException(new CommandException(e))
+            )
+        );
         await tcs.Task;
     }
 
@@ -863,7 +963,13 @@ public class Client : IClient, IDisposable
             throw new Exception("Failed to create Stream.SetProperty command");
 
         var tcs = new TaskCompletionSource<string>();
-        Execute(command, new ResponseHandler<string>(tcs.SetResult, e => tcs.SetException(new CommandException(e))));
+        Execute(
+            command,
+            new ResponseHandler<string>(
+                tcs.SetResult,
+                e => tcs.SetException(new CommandException(e))
+            )
+        );
         await tcs.Task;
     }
 
