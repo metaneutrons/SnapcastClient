@@ -133,7 +133,11 @@ public interface IClient
     /// <param name="command">The control command to send.</param>
     /// <param name="parameters">Optional parameters for the command.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public Task StreamControlAsync(string id, string command, Dictionary<string, object>? parameters = null);
+    public Task StreamControlAsync(
+        string id,
+        string command,
+        Dictionary<string, object>? parameters = null
+    );
 
     /// <summary>
     /// Sets a property on a stream.
@@ -151,24 +155,28 @@ public interface IClient
     /// <param name="streamId">The stream ID to play.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     public Task StreamPlayAsync(string streamId);
+
     /// <summary>
     /// Pauses a stream.
     /// </summary>
     /// <param name="streamId">The stream ID to pause.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     public Task StreamPauseAsync(string streamId);
+
     /// <summary>
     /// Skips to the next track in a stream.
     /// </summary>
     /// <param name="streamId">The stream ID.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     public Task StreamNextAsync(string streamId);
+
     /// <summary>
     /// Skips to the previous track in a stream.
     /// </summary>
     /// <param name="streamId">The stream ID.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     public Task StreamPreviousAsync(string streamId);
+
     /// <summary>
     /// Seeks to a specific position in a stream.
     /// </summary>
@@ -176,6 +184,7 @@ public interface IClient
     /// <param name="position">The position to seek to in seconds.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     public Task StreamSeekAsync(string streamId, double position);
+
     /// <summary>
     /// Seeks by an offset in a stream.
     /// </summary>
@@ -192,6 +201,7 @@ public interface IClient
     /// <param name="volume">The volume level (0-100).</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     public Task StreamSetVolumeAsync(string streamId, int volume);
+
     /// <summary>
     /// Sets the mute status for a stream.
     /// </summary>
@@ -199,6 +209,7 @@ public interface IClient
     /// <param name="mute">True to mute, false to unmute.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     public Task StreamSetMuteAsync(string streamId, bool mute);
+
     /// <summary>
     /// Sets the shuffle mode for a stream.
     /// </summary>
@@ -206,6 +217,7 @@ public interface IClient
     /// <param name="shuffle">True to enable shuffle, false to disable.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     public Task StreamSetShuffleAsync(string streamId, bool shuffle);
+
     /// <summary>
     /// Sets the loop status for a stream.
     /// </summary>
@@ -213,6 +225,7 @@ public interface IClient
     /// <param name="loopStatus">The loop status ("none", "track", "playlist").</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     public Task StreamSetLoopStatusAsync(string streamId, string loopStatus);
+
     /// <summary>
     /// Sets the playback rate for a stream.
     /// </summary>

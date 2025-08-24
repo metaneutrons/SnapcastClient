@@ -491,10 +491,41 @@ public class Client : IClient, IDisposable
         if (isHealthy)
         {
             _logger?.LogInformation("Connection health restored");
+            
+            // Log detailed restoration info
+            try
+            {
+                var diagnostics = Connection.GetDiagnostics();
+                _logger?.LogDebug("Connection restored - Response time improved, Total messages: {TotalMessages}, Downtime: {TotalDowntime:F1}s", 
+                    diagnostics.HealthStats.TotalMessages, 
+                    diagnostics.HealthStats.TotalDowntime.TotalSeconds);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogDebug(ex, "Could not retrieve connection diagnostics on health restoration");
+            }
         }
         else
         {
-            _logger?.LogWarning("Connection health degraded");
+            // Enhanced degradation logging with detailed reasons
+            try
+            {
+                var diagnostics = Connection.GetDiagnostics();
+                var healthStats = diagnostics.HealthStats;
+                var circuitBreakerStats = diagnostics.CircuitBreakerStats;
+                
+                _logger?.LogWarning("Connection health degraded - Last message: {TimeSinceLastMessage:F1}s ago (threshold: 30.0s), " +
+                    "Total messages: {TotalMessages}, Circuit breaker: {CircuitBreakerState}, " +
+                    "Failed attempts: {FailedAttempts}",
+                    healthStats.TimeSinceLastMessage.TotalSeconds,
+                    healthStats.TotalMessages,
+                    circuitBreakerStats.State,
+                    circuitBreakerStats.FailureCount);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogWarning("Connection health degraded - Unable to retrieve detailed diagnostics: {Error}", ex.Message);
+            }
         }
     }
 

@@ -63,7 +63,7 @@ public class ProducerConsumerTests
             IsProcessing = true,
             IsHealthy = true,
             LastMessageReceived = DateTime.UtcNow.AddSeconds(-5),
-            QueuedMessages = 3
+            QueuedMessages = 3,
         };
 
         // Act
@@ -80,10 +80,7 @@ public class ProducerConsumerTests
     {
         // Arrange
         var fiveSecondsAgo = DateTime.UtcNow.AddSeconds(-5);
-        var stats = new MessageProcessingStats
-        {
-            LastMessageReceived = fiveSecondsAgo
-        };
+        var stats = new MessageProcessingStats { LastMessageReceived = fiveSecondsAgo };
 
         // Act
         var timeSince = stats.TimeSinceLastMessage;
@@ -110,10 +107,7 @@ public class ProducerConsumerTests
     public void MessageProcessingStats_QueuedMessages_ShouldHandleNegativeValues()
     {
         // Arrange
-        var stats = new MessageProcessingStats
-        {
-            QueuedMessages = -1
-        };
+        var stats = new MessageProcessingStats { QueuedMessages = -1 };
 
         // Act
         var result = stats.ToString();
