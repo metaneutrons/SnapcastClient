@@ -629,12 +629,24 @@ public class Client : IClient, IDisposable
     /// <returns>A task representing the asynchronous operation.</returns>
     public async Task ClientSetVolumeAsync(string id, int volume)
     {
+        await ClientSetVolumeAsync(id, volume, false);
+    }
+
+    /// <summary>
+    /// Sets the volume and mute state of a client.
+    /// </summary>
+    /// <param name="id">The ID of the client.</param>
+    /// <param name="volume">The volume level to set.</param>
+    /// <param name="muted">Whether the client should be muted.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    public async Task ClientSetVolumeAsync(string id, int volume, bool muted)
+    {
         var command = CommandFactory.createCommand(
             CommandType.CLIENT_SET_VOLUME,
             new Params.ClientSetVolume
             {
                 Id = id,
-                Volume = new Params.ClientVolume { Muted = false, Percent = volume },
+                Volume = new Params.ClientVolume { Muted = muted, Percent = volume },
             }
         );
         if (command == null)

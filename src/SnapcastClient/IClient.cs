@@ -39,6 +39,15 @@ public interface IClient
     public Task ClientSetVolumeAsync(string id, int volume);
 
     /// <summary>
+    /// Sets the volume and mute state for a specific client.
+    /// </summary>
+    /// <param name="id">The client ID.</param>
+    /// <param name="volume">The volume level (0-100).</param>
+    /// <param name="muted">Whether the client should be muted.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    public Task ClientSetVolumeAsync(string id, int volume, bool muted);
+
+    /// <summary>
     /// Sets the latency for a specific client.
     /// </summary>
     /// <param name="id">The client ID.</param>
